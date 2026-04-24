@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DeviceProtocol protocol="SiemensS7" deviceType="StandardTempHumidity">
+  <Tags>
+    <Tag name="TemperaturePV" displayName="当前温度" group="Acquire" address="DB100.DBD10" dataType="Real" unit="℃" scale="1" offset="0" access="Read" />
+    <Tag name="HumidityPV" displayName="当前湿度" group="Acquire" address="DB100.DBD14" dataType="Real" unit="%RH" scale="1" offset="0" access="Read" />
+    <Tag name="PressurePV" displayName="当前压力" group="Acquire" address="DB100.DBD18" dataType="Real" unit="kPa" scale="1" offset="0" access="Read" />
+
+    <Tag name="TemperatureSV" displayName="温度设定" group="Control" address="DB100.DBD22" dataType="Real" unit="℃" scale="1" offset="0" access="ReadWrite" />
+    <Tag name="HumiditySV" displayName="湿度设定" group="Control" address="DB100.DBD26" dataType="Real" unit="%RH" scale="1" offset="0" access="ReadWrite" />
+
+    <Tag name="RunCommand" displayName="运行命令" group="Control" address="DB100.DBX100.0" dataType="Bool" unit="" scale="1" offset="0" access="Write" />
+    <Tag name="StopCommand" displayName="停止命令" group="Control" address="DB100.DBX100.1" dataType="Bool" unit="" scale="1" offset="0" access="Write" />
+
+    <Tag name="RemoteMode" displayName="远程模式" group="Status" address="DB100.DBX0.0" dataType="Bool" unit="" scale="1" offset="0" access="Read" />
+    <Tag name="ProgramMode" displayName="程序模式" group="Status" address="DB100.DBX0.1" dataType="Bool" unit="" scale="1" offset="0" access="Read" />
+    <Tag name="AlarmHighTemp" displayName="超温报警" group="Alarm" address="DB100.DBX120.0" dataType="Bool" unit="" scale="1" offset="0" access="Read" />
+  </Tags>
+</DeviceProtocol>
