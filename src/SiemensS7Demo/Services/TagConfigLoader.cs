@@ -34,6 +34,12 @@ public static class TagConfigLoader
 
     private static TagDefinition ParseTag(XElement element)
     {
+        var options = element.Elements("Option")
+            .Select(opt => new TagOption(
+                long.Parse(Required(opt, "value"), CultureInfo.InvariantCulture),
+                Required(opt, "name")))
+            .ToList();
+
         return new TagDefinition
         {
             Name = Required(element, "name"),
@@ -47,7 +53,8 @@ public static class TagConfigLoader
             Access = ParseEnum<TagAccess>((string?)element.Attribute("access") ?? nameof(TagAccess.Read), "access"),
             SafeWrite = ParseBool(element, "safeWrite", false),
             Min = ParseNullableDouble(element, "min"),
-            Max = ParseNullableDouble(element, "max")
+            Max = ParseNullableDouble(element, "max"),
+            Options = options
         };
     }
 

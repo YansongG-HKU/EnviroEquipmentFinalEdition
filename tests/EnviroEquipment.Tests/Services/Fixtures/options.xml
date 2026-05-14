@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Tags>
+    <Tag name="Mode" displayName="Mode" group="Probe" address="MW0" dataType="Int16" unit="">
+      <Option name="Off" value="0"/>
+      <Option name="On" value="1"/>
+    </Tag>
+    <Tag name="Plain" displayName="Plain" group="Probe" address="MW2" dataType="Int16" unit=""/>
+  </Tags>
+</Configuration>
