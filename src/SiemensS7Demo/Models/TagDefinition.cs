@@ -30,7 +30,23 @@ public sealed class TagDefinition
     public bool SafeWrite { get; init; }
     public double? Min { get; init; }
     public double? Max { get; init; }
+    public IReadOnlyList<TagOption> Options { get; init; } = System.Array.Empty<TagOption>();
 
     public double ConvertRawToEngineering(double raw) => raw * Scale + Offset;
     public double ConvertEngineeringToRaw(double engineering) => (engineering - Offset) / Scale;
+
+    public bool TryGetOptionLabel(long rawValue, out string? label)
+    {
+        foreach (var option in Options)
+        {
+            if (option.Value == rawValue)
+            {
+                label = option.Label;
+                return true;
+            }
+        }
+
+        label = null;
+        return false;
+    }
 }
