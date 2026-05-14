@@ -1,0 +1,26 @@
+# .NET build output
+bin/
+obj/
+
+# Test output
+TestResults/
+*.trx
+*.coverage
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Claude Code local settings and worktrees
+.claude/
+
+# Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# OS
+.DS_Store
+Thumbs.db
