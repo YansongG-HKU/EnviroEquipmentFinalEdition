@@ -142,6 +142,41 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
         _client?.Close();
     }
 
+    /// <summary>
+    /// Swap the 4 bytes of a 2-register value according to <paramref name="order"/>.
+    /// `fromWire=false`: convert a canonical big-endian (ABCD) buffer into wire layout.
+    /// `fromWire=true`:  convert a wire-layout buffer back into canonical big-endian.
+    /// CDAB and BADC are their own inverses, so the flag is informational; ABCD and DCBA
+    /// also round-trip. The flag exists so future asymmetric orders can be added cleanly.
+    /// </summary>
+    internal static void ApplyWordOrder(byte[] buffer, WordOrder order, bool fromWire)
+    {
+        if (buffer.Length != 4)
+        {
+            throw new ArgumentException("WordOrder swap requires exactly 4 bytes.", nameof(buffer));
+        }
+
+        _ = fromWire;
+        switch (order)
+        {
+            case WordOrder.ABCD:
+                return;
+            case WordOrder.CDAB:
+                (buffer[0], buffer[2]) = (buffer[2], buffer[0]);
+                (buffer[1], buffer[3]) = (buffer[3], buffer[1]);
+                return;
+            case WordOrder.BADC:
+                (buffer[0], buffer[1]) = (buffer[1], buffer[0]);
+                (buffer[2], buffer[3]) = (buffer[3], buffer[2]);
+                return;
+            case WordOrder.DCBA:
+                Array.Reverse(buffer);
+                return;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(order), order, "Unsupported word order.");
+        }
+    }
+
     private async Task<byte[]> SendRequestAsync(byte function, int address, int count, byte[] valueBytes, CancellationToken cancellationToken)
     {
         if (function is 0x05 or 0x06)
