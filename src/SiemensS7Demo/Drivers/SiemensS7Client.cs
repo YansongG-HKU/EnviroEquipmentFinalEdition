@@ -93,6 +93,17 @@ public sealed class SiemensS7Client : IPlcClient
                 try
                 {
                     var raw = await _adapter.ReadRawAsync(tag, cancellationToken);
+                    var converted = ConvertReadValue(tag, raw);
+                    string? displayValue = null;
+                    if (tag.Options.Count > 0)
+                    {
+                        var rawLong = ToOptionKey(raw);
+                        if (rawLong.HasValue && tag.TryGetOptionLabel(rawLong.Value, out var label))
+                        {
+                            displayValue = label;
+                        }
+                    }
+
                     output[tag.Name] = new TagValue
                     {
                         Name = tag.Name,
@@ -100,7 +111,8 @@ public sealed class SiemensS7Client : IPlcClient
                         Address = tag.Address,
                         Unit = tag.Unit,
                         RawValue = raw,
-                        Value = ConvertReadValue(tag, raw),
+                        Value = converted,
+                        DisplayValue = displayValue,
                         TimestampUtc = DateTime.UtcNow,
                         IsQualityGood = true
                     };
@@ -161,5 +173,26 @@ public sealed class SiemensS7Client : IPlcClient
 
         var numeric = Convert.ToDouble(raw, System.Globalization.CultureInfo.InvariantCulture);
         return tag.ConvertRawToEngineering(numeric);
+    }
+
+    private static long? ToOptionKey(object raw)
+    {
+        try
+        {
+            return raw switch
+            {
+                bool b => b ? 1L : 0L,
+                long l => l,
+                int i => i,
+                short s => s,
+                ushort u => u,
+                uint u2 => u2,
+                _ => null
+            };
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
