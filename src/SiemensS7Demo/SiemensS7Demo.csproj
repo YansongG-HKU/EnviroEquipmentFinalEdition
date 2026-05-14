@@ -11,6 +11,9 @@
     <None Include="Native\Snap7\reference\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="EnviroEquipment.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Config\*.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Config\*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Native\Snap7\win64\snap7.dll"
