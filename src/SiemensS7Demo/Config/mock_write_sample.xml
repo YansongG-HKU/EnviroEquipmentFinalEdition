@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DeviceProtocol protocol="Mock" deviceType="InMemory">
+  <Tags>
+    <Tag name="MockWord" displayName="Mock word" group="SelfTest" address="MW2" dataType="Int16" unit="" scale="1" offset="0" access="ReadWrite" safeWrite="true" min="0" max="1000" />
+    <Tag name="MockBit" displayName="Mock bit" group="SelfTest" address="M4.0" dataType="Bool" unit="" scale="1" offset="0" access="ReadWrite" safeWrite="true" />
+  </Tags>
+</DeviceProtocol>

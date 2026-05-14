@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using SiemensS7Demo.Drivers;
 using SiemensS7Demo.Models;
 

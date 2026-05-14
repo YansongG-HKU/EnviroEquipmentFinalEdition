@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DeviceProtocol protocol="SiemensS7" deviceType="S7-200SMART">
+  <Tags>
+    <Tag name="VBit0" displayName="V区位0.0" group="Probe" address="V0.0" dataType="Bool" unit="" scale="1" offset="0" access="Read" />
+    <Tag name="VWord0" displayName="V区字0" group="Probe" address="VW0" dataType="Int16" unit="" scale="1" offset="0" access="Read" />
+    <Tag name="VWord2" displayName="V区字2" group="Probe" address="VW2" dataType="Int16" unit="" scale="1" offset="0" access="Read" />
+    <Tag name="VDInt4" displayName="V区双字4" group="Probe" address="VD4" dataType="DInt" unit="" scale="1" offset="0" access="Read" />
+    <Tag name="VReal8" displayName="V区浮点8" group="Probe" address="VD8" dataType="Real" unit="" scale="1" offset="0" access="Read" />
+    <Tag name="MBit0" displayName="M区位0.0" group="Probe" address="M0.0" dataType="Bool" unit="" scale="1" offset="0" access="Read" />
+  </Tags>
+</DeviceProtocol>

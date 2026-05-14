@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using SiemensS7Demo.Models;
 
 namespace SiemensS7Demo.Drivers;
@@ -52,6 +56,24 @@ public sealed class SiemensS7Client : IPlcClient
         }
     }
 
+    public async Task<PlcDeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken)
+    {
+        if (!IsConnected)
+        {
+            throw new InvalidOperationException("PLC not connected.");
+        }
+
+        await _requestLock.WaitAsync(cancellationToken);
+        try
+        {
+            return await _adapter.GetDeviceInfoAsync(_options, cancellationToken);
+        }
+        finally
+        {
+            _requestLock.Release();
+        }
+    }
+
     public async Task<IReadOnlyDictionary<string, TagValue>> ReadTagsAsync(
         IReadOnlyList<TagDefinition> tags,
         CancellationToken cancellationToken)
@@ -68,14 +90,35 @@ public sealed class SiemensS7Client : IPlcClient
         {
             foreach (var tag in tags)
             {
-                var raw = await _adapter.ReadRawAsync(tag, cancellationToken);
-                output[tag.Name] = new TagValue
+                try
                 {
-                    Name = tag.Name,
-                    Value = raw,
-                    TimestampUtc = DateTime.UtcNow,
-                    IsQualityGood = true
-                };
+                    var raw = await _adapter.ReadRawAsync(tag, cancellationToken);
+                    output[tag.Name] = new TagValue
+                    {
+                        Name = tag.Name,
+                        DisplayName = tag.DisplayName,
+                        Address = tag.Address,
+                        Unit = tag.Unit,
+                        RawValue = raw,
+                        Value = ConvertReadValue(tag, raw),
+                        TimestampUtc = DateTime.UtcNow,
+                        IsQualityGood = true
+                    };
+                }
+                catch (Exception ex)
+                {
+                    output[tag.Name] = new TagValue
+                    {
+                        Name = tag.Name,
+                        DisplayName = tag.DisplayName,
+                        Address = tag.Address,
+                        Unit = tag.Unit,
+                        Value = string.Empty,
+                        TimestampUtc = DateTime.UtcNow,
+                        IsQualityGood = false,
+                        QualityMessage = ex.Message
+                    };
+                }
             }
         }
         finally
@@ -107,5 +150,16 @@ public sealed class SiemensS7Client : IPlcClient
         {
             _requestLock.Release();
         }
+    }
+
+    private static object ConvertReadValue(TagDefinition tag, object raw)
+    {
+        if (tag.DataType == TagDataType.Bool)
+        {
+            return raw;
+        }
+
+        var numeric = Convert.ToDouble(raw, System.Globalization.CultureInfo.InvariantCulture);
+        return tag.ConvertRawToEngineering(numeric);
     }
 }

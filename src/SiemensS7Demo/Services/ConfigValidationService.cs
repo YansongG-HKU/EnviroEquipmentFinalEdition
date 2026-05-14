@@ -1,0 +1,174 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using SiemensS7Demo.Drivers;
+using SiemensS7Demo.Models;
+
+namespace SiemensS7Demo.Services;
+
+public enum ConfigIssueSeverity
+{
+    Error,
+    Warning
+}
+
+public sealed record ConfigValidationIssue(
+    ConfigIssueSeverity Severity,
+    string Scope,
+    string Message);
+
+public static class ConfigValidationService
+{
+    public static IReadOnlyList<ConfigValidationIssue> ValidateTags(
+        IReadOnlyList<TagDefinition> tags,
+        string protocol,
+        string scope)
+    {
+        var issues = new List<ConfigValidationIssue>();
+        var normalizedProtocol = NormalizeProtocol(protocol);
+
+        var duplicateNames = tags
+            .GroupBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key);
+
+        foreach (var name in duplicateNames)
+        {
+            issues.Add(Error(scope, $"Duplicate tag name '{name}'."));
+        }
+
+        foreach (var tag in tags)
+        {
+            var tagScope = $"{scope}/{tag.Name}";
+            if (string.IsNullOrWhiteSpace(tag.Address))
+            {
+                issues.Add(Error(tagScope, "Address is required."));
+                continue;
+            }
+
+            if (tag.DataType != TagDataType.Bool && Math.Abs(tag.Scale) < double.Epsilon)
+            {
+                issues.Add(Error(tagScope, "Scale must not be 0 for numeric tags."));
+            }
+
+            if (tag.Min.HasValue && tag.Max.HasValue && tag.Min.Value > tag.Max.Value)
+            {
+                issues.Add(Error(tagScope, $"Min {tag.Min.Value} is greater than max {tag.Max.Value}."));
+            }
+
+            if (tag.SafeWrite && tag.Access == TagAccess.Read)
+            {
+                issues.Add(Error(tagScope, "safeWrite=true is invalid on a read-only tag."));
+            }
+
+            if (tag.Access != TagAccess.Read && !tag.SafeWrite)
+            {
+                issues.Add(Warning(tagScope, "Write-capable tag is locked because safeWrite=false."));
+            }
+
+            try
+            {
+                ValidateAddress(normalizedProtocol, tag);
+            }
+            catch (Exception ex)
+            {
+                issues.Add(Error(tagScope, ex.Message));
+            }
+        }
+
+        return issues;
+    }
+
+    public static IReadOnlyList<ConfigValidationIssue> ValidateProject(ProjectDefinition project)
+    {
+        var issues = new List<ConfigValidationIssue>();
+        if (string.IsNullOrWhiteSpace(project.ProjectId))
+        {
+            issues.Add(Error("project", "ProjectId is required."));
+        }
+
+        var duplicateDeviceIds = project.Devices
+            .GroupBy(device => device.Id, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key);
+
+        foreach (var id in duplicateDeviceIds)
+        {
+            issues.Add(Error("project", $"Duplicate device id '{id}'."));
+        }
+
+        foreach (var device in project.Devices)
+        {
+            var scope = $"device:{device.Id}";
+            if (string.IsNullOrWhiteSpace(device.Id))
+            {
+                issues.Add(Error(scope, "Device id is required."));
+            }
+
+            if (string.IsNullOrWhiteSpace(device.Ip))
+            {
+                issues.Add(Error(scope, "Device IP is required."));
+            }
+
+            if (device.Port is < 1 or > 65535)
+            {
+                issues.Add(Error(scope, $"Port {device.Port} is outside 1..65535."));
+            }
+
+            if (device.PollingIntervalMs is < 100 or > 600000)
+            {
+                issues.Add(Error(scope, $"PollingIntervalMs {device.PollingIntervalMs} is outside 100..600000."));
+            }
+
+            try
+            {
+                NormalizeProtocol(device.Protocol);
+            }
+            catch (Exception ex)
+            {
+                issues.Add(Error(scope, ex.Message));
+            }
+
+            issues.AddRange(ValidateTags(device.Tags, device.Protocol, scope));
+        }
+
+        return issues;
+    }
+
+    public static bool HasErrors(IReadOnlyList<ConfigValidationIssue> issues)
+        => issues.Any(issue => issue.Severity == ConfigIssueSeverity.Error);
+
+    private static void ValidateAddress(string normalizedProtocol, TagDefinition tag)
+    {
+        switch (normalizedProtocol)
+        {
+            case "s7":
+                S7Address.Parse(tag);
+                break;
+            case "modbus":
+                ModbusAddress.Parse(tag);
+                break;
+            case "mock":
+                break;
+            default:
+                throw new InvalidOperationException($"Unsupported protocol '{normalizedProtocol}'.");
+        }
+    }
+
+    private static string NormalizeProtocol(string protocol)
+    {
+        return protocol.ToLowerInvariant() switch
+        {
+            "snap7" or "s7" or "siemens" => "s7",
+            "modbus" or "modbus-tcp" => "modbus",
+            "mock" => "mock",
+            _ => throw new InvalidOperationException($"Unsupported protocol '{protocol}'.")
+        };
+    }
+
+    private static ConfigValidationIssue Error(string scope, string message)
+        => new(ConfigIssueSeverity.Error, scope, message);
+
+    private static ConfigValidationIssue Warning(string scope, string message)
+        => new(ConfigIssueSeverity.Warning, scope, message);
+}
