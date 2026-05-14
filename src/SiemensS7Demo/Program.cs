@@ -810,6 +810,15 @@ static async Task<int> RunSelfTestAsync(DemoRunOptions runOptions, CancellationT
         {
             throw new InvalidOperationException("Expected HR3=65001 after Modbus write.");
         }
+
+        var hrf = MakeTag("HrFloat", "HRF20", TagDataType.Real, TagAccess.ReadWrite, safeWrite: true);
+        await client.WriteTagAsync(hrf, 12.5f, cancellationToken);
+        var floatReadback = await client.ReadTagsAsync(new[] { hrf }, cancellationToken);
+        AssertGood(floatReadback, "HrFloat");
+        if (Math.Abs(Convert.ToDouble(floatReadback["HrFloat"].Value, CultureInfo.InvariantCulture) - 12.5) > 0.0001)
+        {
+            throw new InvalidOperationException("Expected HrFloat=12.5 after Modbus write.");
+        }
     });
 
     Console.WriteLine(failures == 0 ? "SelfTest: OK" : $"SelfTest: {failures} failure(s)");
