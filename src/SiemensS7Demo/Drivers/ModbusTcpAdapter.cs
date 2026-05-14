@@ -136,6 +136,11 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
             _ => throw new NotSupportedException($"Unsupported Modbus write type '{tag.DataType}'.")
         };
 
+        if (tag.DataType is TagDataType.DInt or TagDataType.Real)
+        {
+            ApplyWordOrder(registerBytes, _wordOrder, fromWire: false);
+        }
+
         var payload = new byte[5 + registerBytes.Length];
         BinaryPrimitives.WriteUInt16BigEndian(payload.AsSpan(0, 2), checked((ushort)address.Offset));
         BinaryPrimitives.WriteUInt16BigEndian(payload.AsSpan(2, 2), checked((ushort)(registerBytes.Length / 2)));

@@ -58,4 +58,33 @@ public class ModbusTcpAdapterFloatTests
 
         value.Should().NotBe(1.0f);
     }
+
+    [Theory]
+    [InlineData(WordOrder.ABCD)]
+    [InlineData(WordOrder.CDAB)]
+    [InlineData(WordOrder.BADC)]
+    [InlineData(WordOrder.DCBA)]
+    public async Task WriteRaw_ThenReadRaw_RoundTripsFloat(WordOrder order)
+    {
+        await using var server = ModbusLoopbackServer.Start();
+        using var adapter = new ModbusTcpAdapter();
+        var options = new PlcConnectionOptions
+        {
+            Name = "T", IpAddress = "127.0.0.1", Port = server.Port,
+            Protocol = "modbus", CpuType = "Modbus TCP", UnitId = 1,
+            WordOrder = order
+        };
+        await adapter.ConnectAsync(options, CancellationToken.None);
+
+        var tag = new TagDefinition
+        {
+            Name = "F", DisplayName = "F", Group = "g",
+            Address = "HRF20", DataType = TagDataType.Real, Unit = ""
+        };
+
+        await adapter.WriteRawAsync(tag, 3.14159f, CancellationToken.None);
+        var readBack = (float)await adapter.ReadRawAsync(tag, CancellationToken.None);
+
+        readBack.Should().BeApproximately(3.14159f, 0.0001f);
+    }
 }
