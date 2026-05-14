@@ -13,4 +13,5 @@ public sealed class TagValue
     public required DateTime TimestampUtc { get; init; }
     public required bool IsQualityGood { get; init; }
     public string? QualityMessage { get; init; }
+    public string? DisplayValue { get; init; }
 }
