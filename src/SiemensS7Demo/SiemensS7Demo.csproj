@@ -2,7 +2,20 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Native\Snap7\reference\**\*.cs" />
+    <None Include="Native\Snap7\reference\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Config\*.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Config\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Native\Snap7\win64\snap7.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          TargetPath="snap7.dll"
+          Condition="Exists('Native\Snap7\win64\snap7.dll')" />
+  </ItemGroup>
 </Project>

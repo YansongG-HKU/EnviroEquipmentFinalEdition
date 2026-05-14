@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Write template for S7-200 SMART.
+  Do not run this file as-is. Replace the addresses with confirmed safe PLC points first.
+  A write requires both the allow-write CLI flag and tag attribute safeWrite="true".
+-->
+<DeviceProtocol protocol="SiemensS7" deviceType="S7-200SMART">
+  <Tags>
+    <Tag name="SafeVBit100" displayName="Safe V bit 100.0" group="WriteProbe" address="V100.0" dataType="Bool" unit="" scale="1" offset="0" access="ReadWrite" safeWrite="false" />
+    <Tag name="SafeVWord102" displayName="Safe V word 102" group="WriteProbe" address="VW102" dataType="Int16" unit="" scale="1" offset="0" access="ReadWrite" safeWrite="false" min="0" max="1000" />
+  </Tags>
+</DeviceProtocol>

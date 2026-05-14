@@ -4,6 +4,7 @@ public enum TagDataType
 {
     Bool,
     Int16,
+    UInt16,
     DInt,
     Real
 }
@@ -26,6 +27,9 @@ public sealed class TagDefinition
     public double Scale { get; init; } = 1.0;
     public double Offset { get; init; } = 0.0;
     public TagAccess Access { get; init; } = TagAccess.Read;
+    public bool SafeWrite { get; init; }
+    public double? Min { get; init; }
+    public double? Max { get; init; }
 
     public double ConvertRawToEngineering(double raw) => raw * Scale + Offset;
     public double ConvertEngineeringToRaw(double engineering) => (engineering - Offset) / Scale;

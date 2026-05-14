@@ -1,10 +1,11 @@
+using System.Threading;
+using System.Threading.Tasks;
 using SiemensS7Demo.Models;
 
 namespace SiemensS7Demo.Drivers;
 
 /// <summary>
 /// Adapter abstraction used by SiemensS7Client.
-/// In production, implement this with S7NetPlus/Sharp7.
 /// </summary>
 public interface IS7Adapter
 {
@@ -12,6 +13,7 @@ public interface IS7Adapter
     Task DisconnectAsync(CancellationToken cancellationToken);
     bool IsConnected { get; }
 
+    Task<PlcDeviceInfo> GetDeviceInfoAsync(PlcConnectionOptions options, CancellationToken cancellationToken);
     Task<object> ReadRawAsync(TagDefinition tag, CancellationToken cancellationToken);
     Task WriteRawAsync(TagDefinition tag, object value, CancellationToken cancellationToken);
 }

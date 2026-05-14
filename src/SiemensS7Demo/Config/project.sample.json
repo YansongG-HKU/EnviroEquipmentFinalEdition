@@ -1,0 +1,82 @@
+{
+  "projectId": "enviro-equipment-demo",
+  "projectName": "Enviro Equipment Demo",
+  "devices": [
+    {
+      "id": "s7-200-smart-main",
+      "name": "S7-200 SMART Main PLC",
+      "enabled": true,
+      "protocol": "s7",
+      "ip": "192.168.2.180",
+      "port": 102,
+      "cpuType": "S7-200 SMART",
+      "rack": 0,
+      "slot": 0,
+      "connectionType": "basic",
+      "pollingIntervalMs": 1000,
+      "tags": [
+        {
+          "name": "VBit0",
+          "displayName": "V bit 0.0",
+          "group": "Probe",
+          "address": "V0.0",
+          "dataType": "Bool",
+          "unit": "",
+          "access": "Read"
+        },
+        {
+          "name": "VWord0",
+          "displayName": "V word 0",
+          "group": "Probe",
+          "address": "VW0",
+          "dataType": "Int16",
+          "unit": "",
+          "access": "Read"
+        },
+        {
+          "name": "MBit0",
+          "displayName": "M bit 0.0",
+          "group": "Probe",
+          "address": "M0.0",
+          "dataType": "Bool",
+          "unit": "",
+          "access": "Read"
+        }
+      ]
+    },
+    {
+      "id": "modbus-example",
+      "name": "Modbus TCP Example",
+      "enabled": false,
+      "protocol": "modbus",
+      "ip": "192.168.2.181",
+      "port": 502,
+      "unitId": 1,
+      "pollingIntervalMs": 1000,
+      "tags": [
+        {
+          "name": "RunCoil",
+          "displayName": "Run coil",
+          "group": "Probe",
+          "address": "C0",
+          "dataType": "Bool",
+          "unit": "",
+          "access": "ReadWrite",
+          "safeWrite": false
+        },
+        {
+          "name": "HoldingRegister0",
+          "displayName": "Holding register 0",
+          "group": "Probe",
+          "address": "HR0",
+          "dataType": "Int16",
+          "unit": "",
+          "access": "ReadWrite",
+          "safeWrite": false,
+          "min": 0,
+          "max": 1000
+        }
+      ]
+    }
+  ]
+}

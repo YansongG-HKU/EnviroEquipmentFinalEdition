@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using SiemensS7Demo.Models;
 
 namespace SiemensS7Demo.Drivers;
@@ -7,6 +10,8 @@ public interface IPlcClient
     Task ConnectAsync(CancellationToken cancellationToken);
     Task DisconnectAsync(CancellationToken cancellationToken);
     bool IsConnected { get; }
+
+    Task<PlcDeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken);
 
     Task<IReadOnlyDictionary<string, TagValue>> ReadTagsAsync(
         IReadOnlyList<TagDefinition> tags,
