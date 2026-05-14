@@ -27,6 +27,9 @@ public sealed class ModbusLoopbackServer : IAsyncDisposable
         _discreteInputs[0] = true;
         _holdingRegisters[0] = 123;
         _holdingRegisters[1] = 65000;
+        // Pre-seed a float at HR10/HR11 = 1.0f in ABCD layout (0x3F800000).
+        _holdingRegisters[10] = 0x3F80;
+        _holdingRegisters[11] = 0x0000;
         _inputRegisters[0] = 456;
 
         _acceptTask = AcceptLoopAsync(_cts.Token);

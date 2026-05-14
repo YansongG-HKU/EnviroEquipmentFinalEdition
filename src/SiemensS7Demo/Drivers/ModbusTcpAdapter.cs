@@ -14,12 +14,14 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
     private NetworkStream? _stream;
     private byte _unitId = 1;
     private ushort _transactionId;
+    private WordOrder _wordOrder = WordOrder.ABCD;
 
     public bool IsConnected => _client?.Connected == true;
 
     public async Task ConnectAsync(PlcConnectionOptions options, CancellationToken cancellationToken)
     {
         _unitId = options.UnitId;
+        _wordOrder = options.WordOrder;
         _client = new TcpClient();
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(options.ConnectTimeoutMs);
@@ -74,12 +76,18 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
             throw new InvalidOperationException($"Modbus response for '{tag.Name}' was too short.");
         }
 
+        var bytes = registers.AsSpan(1, registerCount * 2).ToArray();
+        if (tag.DataType is TagDataType.DInt or TagDataType.Real)
+        {
+            ApplyWordOrder(bytes, _wordOrder, fromWire: true);
+        }
+
         return tag.DataType switch
         {
-            TagDataType.Int16 => BinaryPrimitives.ReadInt16BigEndian(registers.AsSpan(1, 2)),
-            TagDataType.UInt16 => BinaryPrimitives.ReadUInt16BigEndian(registers.AsSpan(1, 2)),
-            TagDataType.DInt => BinaryPrimitives.ReadInt32BigEndian(registers.AsSpan(1, 4)),
-            TagDataType.Real => BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32BigEndian(registers.AsSpan(1, 4))),
+            TagDataType.Int16 => BinaryPrimitives.ReadInt16BigEndian(bytes),
+            TagDataType.UInt16 => BinaryPrimitives.ReadUInt16BigEndian(bytes),
+            TagDataType.DInt => BinaryPrimitives.ReadInt32BigEndian(bytes),
+            TagDataType.Real => BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32BigEndian(bytes)),
             _ => throw new NotSupportedException($"Unsupported Modbus data type '{tag.DataType}'.")
         };
     }
