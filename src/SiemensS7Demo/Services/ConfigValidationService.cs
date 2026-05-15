@@ -74,6 +74,22 @@ public static class ConfigValidationService
             {
                 issues.Add(Error(tagScope, ex.Message));
             }
+
+            if (tag.Options.Count > 0)
+            {
+                var seenValues = new HashSet<long>();
+                foreach (var option in tag.Options)
+                {
+                    if (string.IsNullOrWhiteSpace(option.Label))
+                    {
+                        issues.Add(Error(tagScope, $"Option value {option.Value} has an empty label."));
+                    }
+                    if (!seenValues.Add(option.Value))
+                    {
+                        issues.Add(Error(tagScope, $"Duplicate option value {option.Value}."));
+                    }
+                }
+            }
         }
 
         return issues;

@@ -1,0 +1,30 @@
+{
+  "projectId": "test",
+  "projectName": "test",
+  "devices": [
+    {
+      "id": "dev",
+      "name": "Dev",
+      "enabled": true,
+      "protocol": "mock",
+      "ip": "127.0.0.1",
+      "port": 102,
+      "cpuType": "Mock",
+      "pollingIntervalMs": 1000,
+      "tags": [
+        {
+          "name": "Mode",
+          "displayName": "Mode",
+          "group": "g",
+          "address": "MW0",
+          "dataType": "Int16",
+          "unit": "",
+          "options": [
+            { "value": 0, "label": "Off" },
+            { "value": 1, "label": "On" }
+          ]
+        }
+      ]
+    }
+  ]
+}

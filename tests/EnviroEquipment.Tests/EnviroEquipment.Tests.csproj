@@ -22,4 +22,9 @@
     <ProjectReference Include="..\..\src\SiemensS7Demo\SiemensS7Demo.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Services/Fixtures/options.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Services/Fixtures/options.project.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
