@@ -259,6 +259,7 @@ public sealed class Snap7S7Adapter : IS7Adapter, IDisposable
             TagDataType.Int16 => BinaryPrimitives.ReadInt16BigEndian(buffer),
             TagDataType.UInt16 => BinaryPrimitives.ReadUInt16BigEndian(buffer),
             TagDataType.DInt => BinaryPrimitives.ReadInt32BigEndian(buffer),
+            TagDataType.UInt32 => BinaryPrimitives.ReadUInt32BigEndian(buffer),
             TagDataType.Real => BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32BigEndian(buffer)),
             _ => throw new NotSupportedException($"Unsupported tag data type '{tag.DataType}'.")
         };
@@ -271,6 +272,7 @@ public sealed class Snap7S7Adapter : IS7Adapter, IDisposable
             TagDataType.Int16 => EncodeInt16(value),
             TagDataType.UInt16 => EncodeUInt16(value),
             TagDataType.DInt => EncodeInt32(value),
+            TagDataType.UInt32 => EncodeUInt32(value),
             TagDataType.Real => EncodeReal(value),
             TagDataType.Bool => new[] { Convert.ToBoolean(value, CultureInfo.InvariantCulture) ? (byte)1 : (byte)0 },
             _ => throw new NotSupportedException($"Unsupported tag data type '{tag.DataType}'.")
@@ -295,6 +297,13 @@ public sealed class Snap7S7Adapter : IS7Adapter, IDisposable
     {
         var buffer = new byte[4];
         BinaryPrimitives.WriteInt32BigEndian(buffer, Convert.ToInt32(value, CultureInfo.InvariantCulture));
+        return buffer;
+    }
+
+    private static byte[] EncodeUInt32(object value)
+    {
+        var buffer = new byte[4];
+        BinaryPrimitives.WriteUInt32BigEndian(buffer, Convert.ToUInt32(value, CultureInfo.InvariantCulture));
         return buffer;
     }
 
