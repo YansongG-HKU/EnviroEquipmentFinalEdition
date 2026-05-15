@@ -14,6 +14,7 @@ public sealed class PlcConnectionOptions
     public int ConnectTimeoutMs { get; init; } = 3000;
     public int ReadTimeoutMs { get; init; } = 2000;
     public int WriteTimeoutMs { get; init; } = 2000;
+    public WordOrder WordOrder { get; init; } = WordOrder.ABCD;
 
     public override string ToString()
         => Protocol.Equals("modbus", System.StringComparison.OrdinalIgnoreCase)

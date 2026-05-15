@@ -14,12 +14,14 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
     private NetworkStream? _stream;
     private byte _unitId = 1;
     private ushort _transactionId;
+    private WordOrder _wordOrder = WordOrder.ABCD;
 
     public bool IsConnected => _client?.Connected == true;
 
     public async Task ConnectAsync(PlcConnectionOptions options, CancellationToken cancellationToken)
     {
         _unitId = options.UnitId;
+        _wordOrder = options.WordOrder;
         _client = new TcpClient();
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(options.ConnectTimeoutMs);
@@ -74,12 +76,18 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
             throw new InvalidOperationException($"Modbus response for '{tag.Name}' was too short.");
         }
 
+        var bytes = registers.AsSpan(1, registerCount * 2).ToArray();
+        if (tag.DataType is TagDataType.DInt or TagDataType.Real)
+        {
+            ApplyWordOrder(bytes, _wordOrder, fromWire: true);
+        }
+
         return tag.DataType switch
         {
-            TagDataType.Int16 => BinaryPrimitives.ReadInt16BigEndian(registers.AsSpan(1, 2)),
-            TagDataType.UInt16 => BinaryPrimitives.ReadUInt16BigEndian(registers.AsSpan(1, 2)),
-            TagDataType.DInt => BinaryPrimitives.ReadInt32BigEndian(registers.AsSpan(1, 4)),
-            TagDataType.Real => BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32BigEndian(registers.AsSpan(1, 4))),
+            TagDataType.Int16 => BinaryPrimitives.ReadInt16BigEndian(bytes),
+            TagDataType.UInt16 => BinaryPrimitives.ReadUInt16BigEndian(bytes),
+            TagDataType.DInt => BinaryPrimitives.ReadInt32BigEndian(bytes),
+            TagDataType.Real => BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32BigEndian(bytes)),
             _ => throw new NotSupportedException($"Unsupported Modbus data type '{tag.DataType}'.")
         };
     }
@@ -128,6 +136,11 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
             _ => throw new NotSupportedException($"Unsupported Modbus write type '{tag.DataType}'.")
         };
 
+        if (tag.DataType is TagDataType.DInt or TagDataType.Real)
+        {
+            ApplyWordOrder(registerBytes, _wordOrder, fromWire: false);
+        }
+
         var payload = new byte[5 + registerBytes.Length];
         BinaryPrimitives.WriteUInt16BigEndian(payload.AsSpan(0, 2), checked((ushort)address.Offset));
         BinaryPrimitives.WriteUInt16BigEndian(payload.AsSpan(2, 2), checked((ushort)(registerBytes.Length / 2)));
@@ -140,6 +153,41 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
     {
         _stream?.Dispose();
         _client?.Close();
+    }
+
+    /// <summary>
+    /// Swap the 4 bytes of a 2-register value according to <paramref name="order"/>.
+    /// `fromWire=false`: convert a canonical big-endian (ABCD) buffer into wire layout.
+    /// `fromWire=true`:  convert a wire-layout buffer back into canonical big-endian.
+    /// CDAB and BADC are their own inverses, so the flag is informational; ABCD and DCBA
+    /// also round-trip. The flag exists so future asymmetric orders can be added cleanly.
+    /// </summary>
+    internal static void ApplyWordOrder(byte[] buffer, WordOrder order, bool fromWire)
+    {
+        if (buffer.Length != 4)
+        {
+            throw new ArgumentException("WordOrder swap requires exactly 4 bytes.", nameof(buffer));
+        }
+
+        _ = fromWire;
+        switch (order)
+        {
+            case WordOrder.ABCD:
+                return;
+            case WordOrder.CDAB:
+                (buffer[0], buffer[2]) = (buffer[2], buffer[0]);
+                (buffer[1], buffer[3]) = (buffer[3], buffer[1]);
+                return;
+            case WordOrder.BADC:
+                (buffer[0], buffer[1]) = (buffer[1], buffer[0]);
+                (buffer[2], buffer[3]) = (buffer[3], buffer[2]);
+                return;
+            case WordOrder.DCBA:
+                Array.Reverse(buffer);
+                return;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(order), order, "Unsupported word order.");
+        }
     }
 
     private async Task<byte[]> SendRequestAsync(byte function, int address, int count, byte[] valueBytes, CancellationToken cancellationToken)
