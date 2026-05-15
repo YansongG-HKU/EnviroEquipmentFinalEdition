@@ -18,6 +18,12 @@ public sealed class DeviceDefinition
     public int PollingIntervalMs { get; init; } = 1000;
     public List<TagDefinition> Tags { get; init; } = new();
 
+    /// <summary>
+    /// Auxiliary function metadata loaded from legacy XML 手动辅助功能 / 程序辅助功能 groups.
+    /// Transitional home until Gap #9 DeviceTemplate is introduced.
+    /// </summary>
+    public List<AuxiliaryFunction> Auxiliaries { get; init; } = new();
+
     public PlcConnectionOptions ToConnectionOptions() => new()
     {
         Name = Name,
