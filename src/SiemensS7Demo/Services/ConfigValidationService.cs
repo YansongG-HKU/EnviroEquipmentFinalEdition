@@ -207,6 +207,8 @@ public static class ConfigValidationService
             issues.AddRange(ValidateTags(device.Tags, device.Protocol, scope));
         }
 
+        issues.AddRange(ValidateTemplates(project.Templates, project.Devices));
+
         return issues;
     }
 
@@ -249,6 +251,66 @@ public static class ConfigValidationService
             {
                 issues.Add(Warning(auxScope,
                     $"StateTagName '{aux.StateTagName}' not found in device tag list."));
+            }
+        }
+
+        return issues;
+    }
+
+    /// <summary>
+    /// Validates all <see cref="DeviceTemplate"/> entries in the project and checks that
+    /// any <see cref="DeviceDefinition.TemplateRef"/> resolves to a known template.
+    /// </summary>
+    public static IReadOnlyList<ConfigValidationIssue> ValidateTemplates(
+        IReadOnlyList<DeviceTemplate> templates,
+        IReadOnlyList<DeviceDefinition> devices)
+    {
+        var issues = new List<ConfigValidationIssue>();
+
+        // Rule 1: Vendor and Model must be non-empty.
+        // Rule 2: Duplicate template keys are errors.
+        // Rule 3: Each template's Tags must pass ValidateTags.
+        var seenKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var template in templates)
+        {
+            var templateScope = $"template:{template.Key}";
+
+            if (string.IsNullOrWhiteSpace(template.Vendor))
+            {
+                issues.Add(Error(templateScope, "DeviceTemplate Vendor must not be empty."));
+            }
+            if (string.IsNullOrWhiteSpace(template.Model))
+            {
+                issues.Add(Error(templateScope, "DeviceTemplate Model must not be empty."));
+            }
+
+            if (!seenKeys.Add(template.Key))
+            {
+                issues.Add(Error(templateScope,
+                    $"Duplicate DeviceTemplate key '{template.Key}'. " +
+                    "Each Vendor/Model combination must be unique."));
+            }
+
+            // Validate the template's tag list.
+            // Protocol is "mock" here: address-format validation is deferred to
+            // the resolved device, which carries its own protocol. Structural rules
+            // (scale, options, bit derivations) are checked now.
+            if (template.Tags.Count > 0)
+            {
+                issues.AddRange(ValidateTags(template.Tags, "mock", templateScope));
+            }
+        }
+
+        // Rule 4: each device's TemplateRef, if set, must resolve to a known template.
+        var templateKeys = seenKeys; // already populated above
+        foreach (var device in devices)
+        {
+            if (device.TemplateRef is not null &&
+                !templateKeys.Contains(device.TemplateRef))
+            {
+                issues.Add(Error($"device:{device.Id}",
+                    $"Device '{device.Id}' references template '{device.TemplateRef}' " +
+                    "which was not found in project.templates."));
             }
         }
 
