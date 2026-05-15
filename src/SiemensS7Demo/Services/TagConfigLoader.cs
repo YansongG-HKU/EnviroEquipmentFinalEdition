@@ -10,6 +10,62 @@ namespace SiemensS7Demo.Services;
 
 public static class TagConfigLoader
 {
+    /// <summary>
+    /// Loads a legacy <c>addressConfig.xml</c> file with root element <c>&lt;root&gt;</c>.
+    /// Synthesizes <see cref="TagDefinition.Address"/>, <see cref="TagDefinition.DataType"/>,
+    /// and <see cref="TagDefinition.ScaleMode"/> from the child elements
+    /// <c>&lt;address&gt;</c>, <c>&lt;area&gt;</c>, <c>&lt;dbnumber&gt;</c>,
+    /// <c>&lt;type&gt;</c>, <c>&lt;deviation&gt;</c>, <c>&lt;scale&gt;</c>.
+    /// </summary>
+    public static IReadOnlyList<TagDefinition> LoadLegacy(string configPath)
+    {
+        if (!File.Exists(configPath))
+        {
+            throw new FileNotFoundException("Legacy tag configuration file was not found.", configPath);
+        }
+
+        var document = XDocument.Load(configPath, LoadOptions.None);
+        if (!string.Equals(document.Root?.Name.LocalName, "root", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Expected legacy XML root element <root>, found <{document.Root?.Name.LocalName}>. " +
+                "Use TagConfigLoader.Load() for modern <Configuration> files.");
+        }
+
+        var tags = new List<TagDefinition>();
+        foreach (var paramType in document.Root!.Elements("ParamType"))
+        {
+            var groupName = (string?)paramType.Attribute("GroupName") ?? string.Empty;
+            foreach (var param in paramType.Elements("Param"))
+            {
+                tags.Add(ParseLegacyParam(param, groupName));
+            }
+        }
+
+        if (tags.Count == 0)
+        {
+            throw new InvalidOperationException($"No tags found in legacy file '{configPath}'.");
+        }
+
+        return tags;
+    }
+
+    /// <summary>
+    /// Loads a tag configuration file of either format by inspecting the root element.
+    /// </summary>
+    public static IReadOnlyList<TagDefinition> LoadAuto(string configPath)
+    {
+        if (!File.Exists(configPath))
+        {
+            throw new FileNotFoundException("Tag configuration file was not found.", configPath);
+        }
+
+        var root = XDocument.Load(configPath, LoadOptions.None).Root?.Name.LocalName;
+        return string.Equals(root, "root", StringComparison.OrdinalIgnoreCase)
+            ? LoadLegacy(configPath)
+            : Load(configPath);
+    }
+
     public static IReadOnlyList<TagDefinition> Load(string configPath)
     {
         if (!File.Exists(configPath))
@@ -69,6 +125,61 @@ public static class TagConfigLoader
             Max = ParseNullableDouble(element, "max"),
             Options = options,
             BitDerivations = derivations
+        };
+    }
+
+    private static TagDefinition ParseLegacyParam(XElement param, string groupName)
+    {
+        var paramName = (string?)param.Attribute("ParamName")
+            ?? throw new InvalidOperationException("Legacy <Param> is missing required ParamName attribute.");
+
+        var rawAddress = int.Parse(
+            param.Element("address")?.Value?.Trim() ?? "0",
+            CultureInfo.InvariantCulture);
+        var area = param.Element("area")?.Value?.Trim() ?? string.Empty;
+        var dbnumber = int.Parse(
+            param.Element("dbnumber")?.Value?.Trim() ?? "0",
+            CultureInfo.InvariantCulture);
+        var type = param.Element("type")?.Value?.Trim()
+            ?? throw new InvalidOperationException(
+                $"Legacy <Param ParamName=\"{paramName}\"> is missing <type> element.");
+        var deviation = int.Parse(
+            param.Element("deviation")?.Value?.Trim() ?? "0",
+            CultureInfo.InvariantCulture);
+        var scaleText = param.Element("scale")?.Value?.Trim();
+        var scaleRaw = string.IsNullOrWhiteSpace(scaleText)
+            ? 0.0
+            : double.Parse(scaleText, NumberStyles.Float, CultureInfo.InvariantCulture);
+
+        // Normalize scale: 0 → identity (Scale=1, Multiplier); >0 → Divisor
+        double scale;
+        ScaleMode scaleMode;
+        if (Math.Abs(scaleRaw) < double.Epsilon)
+        {
+            scale = 1.0;
+            scaleMode = ScaleMode.Multiplier;
+        }
+        else
+        {
+            scale = scaleRaw;
+            scaleMode = ScaleMode.Divisor;
+        }
+
+        var (address, dataType) = SynthesizeLegacyAddress(area, dbnumber, rawAddress, type, deviation);
+
+        return new TagDefinition
+        {
+            Name = paramName,
+            DisplayName = paramName,
+            Group = groupName,
+            Address = address,
+            DataType = dataType,
+            Unit = string.Empty,
+            Scale = scale,
+            ScaleMode = scaleMode,
+            Offset = 0.0,
+            Access = TagAccess.Read,
+            SafeWrite = false
         };
     }
 
