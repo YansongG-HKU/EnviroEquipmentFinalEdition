@@ -30,6 +30,12 @@ public sealed class ModbusLoopbackServer : IAsyncDisposable
         // Pre-seed a float at HR10/HR11 = 1.0f in ABCD layout (0x3F800000).
         _holdingRegisters[10] = 0x3F80;
         _holdingRegisters[11] = 0x0000;
+        // DInt at HR12/HR13 = 100000 (0x000186A0) in ABCD layout.
+        _holdingRegisters[12] = 0x0001;
+        _holdingRegisters[13] = 0x86A0;
+        // UInt32 at HR14/HR15 = 0xFFFFFFFE (4294967294) — exercises sign bit.
+        _holdingRegisters[14] = 0xFFFF;
+        _holdingRegisters[15] = 0xFFFE;
         _inputRegisters[0] = 456;
 
         _acceptTask = AcceptLoopAsync(_cts.Token);
