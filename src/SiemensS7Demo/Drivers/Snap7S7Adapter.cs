@@ -1,5 +1,6 @@
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -128,6 +129,58 @@ public sealed class Snap7S7Adapter : IS7Adapter, IDisposable
             var address = S7Address.Parse(tag);
             var bytes = ReadBytes(address, address.ByteSize(tag.DataType));
             return Decode(tag, address, bytes);
+        }, cancellationToken);
+
+    public Task<IReadOnlyDictionary<string, BatchReadResult>> ReadRawBatchAsync(
+        IReadOnlyList<TagDefinition> tags,
+        CancellationToken cancellationToken)
+        => Task.Run<IReadOnlyDictionary<string, BatchReadResult>>(() =>
+        {
+            ThrowIfDisposed();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var output = new Dictionary<string, BatchReadResult>(StringComparer.OrdinalIgnoreCase);
+            if (tags.Count == 0) return output;
+
+            var windows = Snap7BatchPlan.Plan(tags, maxWindowBytes: 240, mergeSlack: 16);
+
+            foreach (var window in windows)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                byte[] buffer;
+                try
+                {
+                    buffer = ReadBytes(
+                        new S7Address(window.AreaCode, window.DbNumber, window.StartByte, BitIndex: null),
+                        window.Length);
+                }
+                catch (Exception ex)
+                {
+                    foreach (var slot in window.Tags)
+                        output[slot.Tag.Name] = BatchReadResult.Bad(ex.Message);
+                    continue;
+                }
+
+                foreach (var slot in window.Tags)
+                {
+                    try
+                    {
+                        var address = S7Address.Parse(slot.Tag);
+                        var size = address.ByteSize(slot.Tag.DataType);
+                        var segment = new byte[size];
+                        Array.Copy(buffer, slot.OffsetInWindow, segment, 0, size);
+                        var decoded = Decode(slot.Tag, address, segment);
+                        output[slot.Tag.Name] = BatchReadResult.Ok(decoded);
+                    }
+                    catch (Exception ex)
+                    {
+                        output[slot.Tag.Name] = BatchReadResult.Bad(ex.Message);
+                    }
+                }
+            }
+
+            return output;
         }, cancellationToken);
 
     public Task WriteRawAsync(TagDefinition tag, object value, CancellationToken cancellationToken)
