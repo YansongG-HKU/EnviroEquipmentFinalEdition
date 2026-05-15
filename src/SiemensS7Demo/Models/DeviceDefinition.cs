@@ -16,6 +16,16 @@ public sealed class DeviceDefinition
     public string ConnectionType { get; init; } = "basic";
     public byte UnitId { get; init; } = 1;
     public int PollingIntervalMs { get; init; } = 1000;
+
+    /// <summary>
+    /// Optional reference to a <see cref="DeviceTemplate"/> key ("Vendor/Model").
+    /// When set, <c>ProjectConfigLoader.Load</c> resolves the template and populates
+    /// <see cref="Tags"/> and <see cref="Auxiliaries"/> from the template.
+    /// A device must NOT define its own <see cref="Tags"/> when <see cref="TemplateRef"/>
+    /// is set (conflict policy: REJECT).
+    /// </summary>
+    public string? TemplateRef { get; init; }
+
     public List<TagDefinition> Tags { get; init; } = new();
 
     /// <summary>
