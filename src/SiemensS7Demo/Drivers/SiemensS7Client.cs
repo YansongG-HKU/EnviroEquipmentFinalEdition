@@ -88,36 +88,10 @@ public sealed class SiemensS7Client : IPlcClient
         await _requestLock.WaitAsync(cancellationToken);
         try
         {
+            var batch = await _adapter.ReadRawBatchAsync(tags, cancellationToken);
             foreach (var tag in tags)
             {
-                try
-                {
-                    var raw = await _adapter.ReadRawAsync(tag, cancellationToken);
-                    var converted = ConvertReadValue(tag, raw);
-                    string? displayValue = null;
-                    if (tag.Options.Count > 0)
-                    {
-                        var rawLong = ToOptionKey(raw);
-                        if (rawLong.HasValue && tag.TryGetOptionLabel(rawLong.Value, out var label))
-                        {
-                            displayValue = label;
-                        }
-                    }
-
-                    output[tag.Name] = new TagValue
-                    {
-                        Name = tag.Name,
-                        DisplayName = tag.DisplayName,
-                        Address = tag.Address,
-                        Unit = tag.Unit,
-                        RawValue = raw,
-                        Value = converted,
-                        DisplayValue = displayValue,
-                        TimestampUtc = DateTime.UtcNow,
-                        IsQualityGood = true
-                    };
-                }
-                catch (Exception ex)
+                if (!batch.TryGetValue(tag.Name, out var result))
                 {
                     output[tag.Name] = new TagValue
                     {
@@ -128,9 +102,51 @@ public sealed class SiemensS7Client : IPlcClient
                         Value = string.Empty,
                         TimestampUtc = DateTime.UtcNow,
                         IsQualityGood = false,
-                        QualityMessage = ex.Message
+                        QualityMessage = "Adapter omitted this tag from the batch result."
                     };
+                    continue;
                 }
+
+                if (!result.IsGood)
+                {
+                    output[tag.Name] = new TagValue
+                    {
+                        Name = tag.Name,
+                        DisplayName = tag.DisplayName,
+                        Address = tag.Address,
+                        Unit = tag.Unit,
+                        Value = string.Empty,
+                        TimestampUtc = DateTime.UtcNow,
+                        IsQualityGood = false,
+                        QualityMessage = result.Error
+                    };
+                    continue;
+                }
+
+                var raw = result.Value!;
+                var converted = ConvertReadValue(tag, raw);
+                string? displayValue = null;
+                if (tag.Options.Count > 0)
+                {
+                    var rawLong = ToOptionKey(raw);
+                    if (rawLong.HasValue && tag.TryGetOptionLabel(rawLong.Value, out var label))
+                    {
+                        displayValue = label;
+                    }
+                }
+
+                output[tag.Name] = new TagValue
+                {
+                    Name = tag.Name,
+                    DisplayName = tag.DisplayName,
+                    Address = tag.Address,
+                    Unit = tag.Unit,
+                    RawValue = raw,
+                    Value = converted,
+                    DisplayValue = displayValue,
+                    TimestampUtc = DateTime.UtcNow,
+                    IsQualityGood = true
+                };
             }
         }
         finally
@@ -175,24 +191,14 @@ public sealed class SiemensS7Client : IPlcClient
         return tag.ConvertRawToEngineering(numeric);
     }
 
-    private static long? ToOptionKey(object raw)
+    private static long? ToOptionKey(object raw) => raw switch
     {
-        try
-        {
-            return raw switch
-            {
-                bool b => b ? 1L : 0L,
-                long l => l,
-                int i => i,
-                short s => s,
-                ushort u => u,
-                uint u2 => u2,
-                _ => null
-            };
-        }
-        catch
-        {
-            return null;
-        }
-    }
+        bool b => b ? 1L : 0L,
+        long l => l,
+        int i => i,
+        short s => s,
+        ushort u => u,
+        uint u2 => u2,
+        _ => null
+    };
 }

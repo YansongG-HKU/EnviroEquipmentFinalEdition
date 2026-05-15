@@ -746,6 +746,33 @@ static async Task<int> RunSelfTestAsync(DemoRunOptions runOptions, CancellationT
         }
     });
 
+    await RunAsync("mock batch read", async () =>
+    {
+        var options = new PlcConnectionOptions { Name = "SelfTestBatch", IpAddress = "127.0.0.1", CpuType = "Mock" };
+        var adapter = new InMemoryS7Adapter();
+        var client = new SiemensS7Client(options, adapter);
+        await client.ConnectAsync(cancellationToken);
+
+        var t1 = MakeTag("Batch1", "MW0", TagDataType.Int16, TagAccess.Read);
+        var t2 = MakeTag("Batch2", "MW2", TagDataType.Int16, TagAccess.Read);
+        var t3 = MakeTag("Batch3", "MD4", TagDataType.DInt, TagAccess.Read);
+
+        await adapter.WriteRawAsync(t1, (short)11, cancellationToken);
+        await adapter.WriteRawAsync(t2, (short)22, cancellationToken);
+        await adapter.WriteRawAsync(t3, 333, cancellationToken);
+
+        var values = await client.ReadTagsAsync(new[] { t1, t2, t3 }, cancellationToken);
+        AssertGood(values, "Batch1");
+        AssertGood(values, "Batch2");
+        AssertGood(values, "Batch3");
+        if (System.Convert.ToInt32(values["Batch1"].Value, System.Globalization.CultureInfo.InvariantCulture) != 11
+            || System.Convert.ToInt32(values["Batch2"].Value, System.Globalization.CultureInfo.InvariantCulture) != 22
+            || System.Convert.ToInt32(values["Batch3"].Value, System.Globalization.CultureInfo.InvariantCulture) != 333)
+        {
+            throw new InvalidOperationException("Batch read returned unexpected values.");
+        }
+    });
+
     await RunAsync("Modbus loopback read/write", async () =>
     {
         await using var server = ModbusLoopbackServer.Start();
