@@ -47,6 +47,11 @@ public static class TagConfigLoader
                 (string?)d.Attribute("displayName")))
             .ToList();
 
+        var scaleModeText = (string?)element.Attribute("scaleMode");
+        var scaleMode = string.IsNullOrWhiteSpace(scaleModeText)
+            ? ScaleMode.Multiplier
+            : ParseEnum<ScaleMode>(scaleModeText, "scaleMode");
+
         return new TagDefinition
         {
             Name = Required(element, "name"),
@@ -56,6 +61,7 @@ public static class TagConfigLoader
             DataType = ParseEnum<TagDataType>(Required(element, "dataType"), "dataType"),
             Unit = (string?)element.Attribute("unit") ?? string.Empty,
             Scale = ParseDouble(element, "scale", 1.0),
+            ScaleMode = scaleMode,
             Offset = ParseDouble(element, "offset", 0.0),
             Access = ParseEnum<TagAccess>((string?)element.Attribute("access") ?? nameof(TagAccess.Read), "access"),
             SafeWrite = ParseBool(element, "safeWrite", false),

@@ -1,0 +1,37 @@
+{
+  "projectId": "test",
+  "projectName": "test",
+  "devices": [
+    {
+      "id": "dev",
+      "name": "Dev",
+      "enabled": true,
+      "protocol": "mock",
+      "ip": "127.0.0.1",
+      "port": 102,
+      "cpuType": "Mock",
+      "pollingIntervalMs": 1000,
+      "tags": [
+        {
+          "name": "Temp",
+          "displayName": "Temperature",
+          "group": "PID",
+          "address": "DB1.DBW336",
+          "dataType": "Int16",
+          "unit": "degC",
+          "scale": 10,
+          "scaleMode": "Divisor"
+        },
+        {
+          "name": "Speed",
+          "displayName": "Speed",
+          "group": "Drive",
+          "address": "MW0",
+          "dataType": "Int16",
+          "unit": "rpm",
+          "scale": 2
+        }
+      ]
+    }
+  ]
+}
