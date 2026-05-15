@@ -48,7 +48,7 @@ public static class ConfigValidationService
                     && siblingNames.Contains(derivation.Name))
                 {
                     issues.Add(Error($"{scope}/{tag.Name}",
-                        $"BitDerivation name '{derivation.Name}' collides with sibling tag '{derivation.Name}'."));
+                        $"BitDerivation name '{derivation.Name}' collides with a sibling tag of the same name."));
                 }
             }
         }
@@ -119,23 +119,21 @@ public static class ConfigValidationService
                 {
                     issues.Add(Error(tagScope, $"BitDerivations are only valid on 16-bit or 32-bit integer host tags; '{tag.Name}' is {tag.DataType}."));
                 }
-                else
+
+                var seenNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var derivation in tag.BitDerivations)
                 {
-                    var seenNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var derivation in tag.BitDerivations)
+                    if (maxBit >= 0 && (derivation.BitOffset < 0 || derivation.BitOffset > maxBit))
                     {
-                        if (derivation.BitOffset < 0 || derivation.BitOffset > maxBit)
-                        {
-                            issues.Add(Error(tagScope, $"BitOffset {derivation.BitOffset} out of range 0..{maxBit}."));
-                        }
-                        if (string.IsNullOrWhiteSpace(derivation.Name))
-                        {
-                            issues.Add(Error(tagScope, "Empty BitDerivation name."));
-                        }
-                        else if (!seenNames.Add(derivation.Name))
-                        {
-                            issues.Add(Error(tagScope, $"Duplicate BitDerivation name '{derivation.Name}'."));
-                        }
+                        issues.Add(Error(tagScope, $"BitOffset {derivation.BitOffset} out of range 0..{maxBit}."));
+                    }
+                    if (string.IsNullOrWhiteSpace(derivation.Name))
+                    {
+                        issues.Add(Error(tagScope, "Empty BitDerivation name."));
+                    }
+                    else if (!seenNames.Add(derivation.Name))
+                    {
+                        issues.Add(Error(tagScope, $"Duplicate BitDerivation name '{derivation.Name}'."));
                     }
                 }
             }
