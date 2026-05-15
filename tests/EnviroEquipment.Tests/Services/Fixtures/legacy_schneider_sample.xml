@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <ParamType GroupName="输出">
+    <Param ParamName="压缩机启动">
+      <address>80</address>
+      <area></area>
+      <dbnumber>0</dbnumber>
+      <type>Q</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+  </ParamType>
+  <ParamType GroupName="模拟量">
+    <Param ParamName="回气压力">
+      <address>100</address>
+      <area></area>
+      <dbnumber>0</dbnumber>
+      <type>HRS</type>
+      <deviation>0</deviation>
+      <scale>10</scale>
+    </Param>
+    <Param ParamName="排气温度">
+      <address>200</address>
+      <area></area>
+      <dbnumber>0</dbnumber>
+      <type>HRF</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+    <Param ParamName="总电量">
+      <address>400</address>
+      <area></area>
+      <dbnumber>0</dbnumber>
+      <type>HRDU</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+  </ParamType>
+</root>
