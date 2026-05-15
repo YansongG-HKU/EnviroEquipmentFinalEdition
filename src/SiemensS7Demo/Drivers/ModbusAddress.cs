@@ -67,7 +67,6 @@ internal sealed record ModbusAddress(string Area, int Offset)
     public bool IsDiscreteInput => Area == "DI";
     public bool IsHoldingRegister => Area is "HR" or "HRF" or "HRD" or "HRDU";
     public bool IsInputRegister => Area == "IR";
-    public bool IsFloatRegister => Area == "HRF";
     public bool IsDoubleRegister => Area is "HRD" or "HRDU";
 
     private static readonly Regex AddressRegex = new(
