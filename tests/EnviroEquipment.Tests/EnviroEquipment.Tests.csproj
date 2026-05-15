@@ -33,6 +33,7 @@
     <None Update="Services/Fixtures/legacy_schneider_sample.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/legacy_with_auxiliaries.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/auxiliaries.project.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Services/Fixtures/templates.project.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

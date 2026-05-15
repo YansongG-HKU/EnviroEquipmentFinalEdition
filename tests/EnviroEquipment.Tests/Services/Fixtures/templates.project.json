@@ -1,0 +1,81 @@
+{
+  "projectId": "template-test",
+  "projectName": "Template Test Project",
+  "templates": [
+    {
+      "vendor": "Siemens",
+      "model": "standardBoxDevice",
+      "tags": [
+        {
+          "name": "Temp",
+          "displayName": "Temperature",
+          "group": "PID",
+          "address": "DB1.DBW336",
+          "dataType": "Int16",
+          "unit": "degC",
+          "scale": 10,
+          "scaleMode": "Divisor"
+        },
+        {
+          "name": "CompressorRun",
+          "displayName": "Compressor Running",
+          "group": "Status",
+          "address": "V9.0",
+          "dataType": "Bool",
+          "unit": ""
+        }
+      ],
+      "auxiliaries": [
+        {
+          "group": "手动辅助功能",
+          "controlTagName": "CompressorStart",
+          "stateTagName": "CompressorRun"
+        }
+      ]
+    }
+  ],
+  "devices": [
+    {
+      "id": "box-A",
+      "name": "Box A",
+      "enabled": true,
+      "protocol": "mock",
+      "ip": "192.168.1.10",
+      "port": 102,
+      "cpuType": "S7-200 SMART",
+      "pollingIntervalMs": 1000,
+      "templateRef": "Siemens/standardBoxDevice"
+    },
+    {
+      "id": "box-B",
+      "name": "Box B",
+      "enabled": true,
+      "protocol": "mock",
+      "ip": "192.168.1.11",
+      "port": 102,
+      "cpuType": "S7-200 SMART",
+      "pollingIntervalMs": 1000,
+      "templateRef": "Siemens/standardBoxDevice"
+    },
+    {
+      "id": "standalone",
+      "name": "Standalone Device",
+      "enabled": true,
+      "protocol": "mock",
+      "ip": "192.168.1.20",
+      "port": 102,
+      "cpuType": "Mock",
+      "pollingIntervalMs": 1000,
+      "tags": [
+        {
+          "name": "Pressure",
+          "displayName": "Pressure",
+          "group": "Sensors",
+          "address": "MW0",
+          "dataType": "Int16",
+          "unit": "bar"
+        }
+      ]
+    }
+  ]
+}
