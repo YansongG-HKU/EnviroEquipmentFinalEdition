@@ -210,6 +210,51 @@ public static class ConfigValidationService
         return issues;
     }
 
+    public static IReadOnlyList<ConfigValidationIssue> ValidateAuxiliaries(
+        IReadOnlyList<AuxiliaryFunction> auxiliaries,
+        IReadOnlyList<TagDefinition> knownTags,
+        string scope)
+    {
+        var issues = new List<ConfigValidationIssue>();
+        var tagNames = knownTags.Select(t => t.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var aux in auxiliaries)
+        {
+            var auxScope = $"{scope}/{aux.Group}/{aux.ControlTagName}";
+
+            // Rule 1: at least one of StateTagName / ProgramBitOffset must be set.
+            if (aux.StateTagName is null && aux.ProgramBitOffset is null)
+            {
+                issues.Add(Error(auxScope,
+                    "AuxiliaryFunction must have at least one of StateTagName or ProgramBitOffset set."));
+                continue;
+            }
+
+            // Rule 2: bit offset range (0..15 for word-sized status register).
+            if (aux.ProgramBitOffset.HasValue &&
+                (aux.ProgramBitOffset.Value < 0 || aux.ProgramBitOffset.Value > 15))
+            {
+                issues.Add(Error(auxScope,
+                    $"ProgramBitOffset {aux.ProgramBitOffset.Value} is outside valid range 0..15."));
+            }
+
+            // Rule 3: referenced tag names must exist — WARNING if missing (UI metadata only).
+            if (!tagNames.Contains(aux.ControlTagName))
+            {
+                issues.Add(Warning(auxScope,
+                    $"ControlTagName '{aux.ControlTagName}' not found in device tag list."));
+            }
+
+            if (aux.StateTagName is not null && !tagNames.Contains(aux.StateTagName))
+            {
+                issues.Add(Warning(auxScope,
+                    $"StateTagName '{aux.StateTagName}' not found in device tag list."));
+            }
+        }
+
+        return issues;
+    }
+
     public static bool HasErrors(IReadOnlyList<ConfigValidationIssue> issues)
         => issues.Any(issue => issue.Severity == ConfigIssueSeverity.Error);
 
