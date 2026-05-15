@@ -1,0 +1,46 @@
+{
+  "projectId": "test",
+  "projectName": "test",
+  "devices": [
+    {
+      "id": "dev",
+      "name": "Dev",
+      "enabled": true,
+      "protocol": "mock",
+      "ip": "127.0.0.1",
+      "port": 102,
+      "cpuType": "Mock",
+      "pollingIntervalMs": 1000,
+      "tags": [
+        {
+          "name": "CompressorStart",
+          "displayName": "Compressor Start",
+          "group": "Output",
+          "address": "MW0",
+          "dataType": "Bool",
+          "unit": ""
+        },
+        {
+          "name": "CompressorRun",
+          "displayName": "Compressor Run",
+          "group": "Status",
+          "address": "MW2",
+          "dataType": "Bool",
+          "unit": ""
+        }
+      ],
+      "auxiliaries": [
+        {
+          "group": "手动辅助功能",
+          "controlTagName": "CompressorStart",
+          "stateTagName": "CompressorRun"
+        },
+        {
+          "group": "程序辅助功能",
+          "controlTagName": "CompressorStart",
+          "programBitOffset": 3
+        }
+      ]
+    }
+  ]
+}
