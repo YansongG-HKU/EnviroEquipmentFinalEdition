@@ -31,11 +31,19 @@ public sealed class TagDefinition
     public bool SafeWrite { get; init; }
     public double? Min { get; init; }
     public double? Max { get; init; }
+    public ScaleMode ScaleMode { get; init; } = ScaleMode.Multiplier;
     public IReadOnlyList<TagOption> Options { get; init; } = System.Array.Empty<TagOption>();
     public IReadOnlyList<BitDerivation> BitDerivations { get; init; } = System.Array.Empty<BitDerivation>();
 
-    public double ConvertRawToEngineering(double raw) => raw * Scale + Offset;
-    public double ConvertEngineeringToRaw(double engineering) => (engineering - Offset) / Scale;
+    public double ConvertRawToEngineering(double raw)
+        => ScaleMode == ScaleMode.Divisor
+            ? raw / Scale + Offset
+            : raw * Scale + Offset;
+
+    public double ConvertEngineeringToRaw(double engineering)
+        => ScaleMode == ScaleMode.Divisor
+            ? (engineering - Offset) * Scale
+            : (engineering - Offset) / Scale;
 
     public bool TryGetOptionLabel(long rawValue, out string? label)
     {
