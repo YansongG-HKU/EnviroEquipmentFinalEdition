@@ -6,6 +6,7 @@ public enum TagDataType
     Int16,
     UInt16,
     DInt,
+    UInt32,
     Real
 }
 
