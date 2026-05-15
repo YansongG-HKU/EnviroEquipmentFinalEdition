@@ -28,6 +28,7 @@
     <None Update="Services/Fixtures/deviations.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/deviations.project.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/scalemode.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Services/Fixtures/scalemode.project.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
