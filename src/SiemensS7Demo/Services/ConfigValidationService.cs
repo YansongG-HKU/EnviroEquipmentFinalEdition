@@ -37,6 +37,22 @@ public static class ConfigValidationService
             issues.Add(Error(scope, $"Duplicate tag name '{name}'."));
         }
 
+        // Check derivation names don't collide with sibling tag names.
+        var siblingNames = tags.Select(t => t.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var tag in tags)
+        {
+            foreach (var derivation in tag.BitDerivations)
+            {
+                if (!string.IsNullOrWhiteSpace(derivation.Name)
+                    && !derivation.Name.Equals(tag.Name, StringComparison.OrdinalIgnoreCase)
+                    && siblingNames.Contains(derivation.Name))
+                {
+                    issues.Add(Error($"{scope}/{tag.Name}",
+                        $"BitDerivation name '{derivation.Name}' collides with sibling tag '{derivation.Name}'."));
+                }
+            }
+        }
+
         foreach (var tag in tags)
         {
             var tagScope = $"{scope}/{tag.Name}";
@@ -87,6 +103,39 @@ public static class ConfigValidationService
                     if (!seenValues.Add(option.Value))
                     {
                         issues.Add(Error(tagScope, $"Duplicate option value {option.Value}."));
+                    }
+                }
+            }
+
+            if (tag.BitDerivations.Count > 0)
+            {
+                var maxBit = tag.DataType switch
+                {
+                    TagDataType.Int16 or TagDataType.UInt16 => 15,
+                    TagDataType.DInt => 31,
+                    _ => -1
+                };
+                if (maxBit < 0)
+                {
+                    issues.Add(Error(tagScope, $"BitDerivations are only valid on 16-bit or 32-bit integer host tags; '{tag.Name}' is {tag.DataType}."));
+                }
+                else
+                {
+                    var seenNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var derivation in tag.BitDerivations)
+                    {
+                        if (derivation.BitOffset < 0 || derivation.BitOffset > maxBit)
+                        {
+                            issues.Add(Error(tagScope, $"BitOffset {derivation.BitOffset} out of range 0..{maxBit}."));
+                        }
+                        if (string.IsNullOrWhiteSpace(derivation.Name))
+                        {
+                            issues.Add(Error(tagScope, "Empty BitDerivation name."));
+                        }
+                        else if (!seenNames.Add(derivation.Name))
+                        {
+                            issues.Add(Error(tagScope, $"Duplicate BitDerivation name '{derivation.Name}'."));
+                        }
                     }
                 }
             }
