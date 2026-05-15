@@ -467,6 +467,7 @@ static object ConvertWriteValue(TagDefinition tag, string value)
         TagDataType.Int16 => ConvertEngineeringNumber<short>(tag, value, raw => checked((short)Math.Round(raw))),
         TagDataType.UInt16 => ConvertEngineeringNumber<ushort>(tag, value, raw => checked((ushort)Math.Round(raw))),
         TagDataType.DInt => ConvertEngineeringNumber<int>(tag, value, raw => checked((int)Math.Round(raw))),
+        TagDataType.UInt32 => ConvertEngineeringNumber<uint>(tag, value, raw => checked((uint)Math.Round(raw))),
         TagDataType.Real => ConvertEngineeringNumber<float>(tag, value, raw => checked((float)raw)),
         _ => throw new NotSupportedException($"Unsupported tag data type '{tag.DataType}'.")
     };
@@ -845,6 +846,23 @@ static async Task<int> RunSelfTestAsync(DemoRunOptions runOptions, CancellationT
         if (Math.Abs(Convert.ToDouble(floatReadback["HrFloat"].Value, CultureInfo.InvariantCulture) - 12.5) > 0.0001)
         {
             throw new InvalidOperationException("Expected HrFloat=12.5 after Modbus write.");
+        }
+
+        var hrd = MakeTag("HrDInt", "HRD30", TagDataType.DInt, TagAccess.ReadWrite, safeWrite: true);
+        var hrdu = MakeTag("HrUInt32", "HRDU40", TagDataType.UInt32, TagAccess.ReadWrite, safeWrite: true);
+
+        await client.WriteTagAsync(hrd, -987654, cancellationToken);
+        await client.WriteTagAsync(hrdu, 3000000000u, cancellationToken);
+        var bigReadback = await client.ReadTagsAsync(new[] { hrd, hrdu }, cancellationToken);
+        AssertGood(bigReadback, "HrDInt");
+        AssertGood(bigReadback, "HrUInt32");
+        if (System.Convert.ToInt32(bigReadback["HrDInt"].Value, System.Globalization.CultureInfo.InvariantCulture) != -987654)
+        {
+            throw new InvalidOperationException("Expected HrDInt=-987654 after Modbus write.");
+        }
+        if (System.Convert.ToUInt32(bigReadback["HrUInt32"].Value, System.Globalization.CultureInfo.InvariantCulture) != 3000000000u)
+        {
+            throw new InvalidOperationException("Expected HrUInt32=3000000000 after Modbus write.");
         }
     });
 

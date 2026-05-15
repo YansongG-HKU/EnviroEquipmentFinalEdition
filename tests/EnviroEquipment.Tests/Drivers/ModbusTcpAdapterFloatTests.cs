@@ -46,9 +46,9 @@ public class ModbusTcpAdapterFloatTests
         };
         await adapter.ConnectAsync(options, CancellationToken.None);
 
-        // HR10/HR11 wire bytes = 0x3F80, 0x0000. Under CDAB the device-published bytes for
-        // 1.0f would be 0x0000, 0x3F80. Our loopback always serves 0x3F80, 0x0000, so under
-        // CDAB this decodes to something other than 1.0f — the swap must be applied.
+        // HR10/HR11 wire bytes = [0x3F, 0x80, 0x00, 0x00]. Under CDAB the swap exchanges the
+        // two 16-bit words, producing [0x00, 0x00, 0x3F, 0x80] = 0x00003F80.
+        // BitConverter.Int32BitsToSingle(0x00003F80) is the expected decoded value.
         var tag = new TagDefinition
         {
             Name = "F", DisplayName = "F", Group = "g",
@@ -56,7 +56,7 @@ public class ModbusTcpAdapterFloatTests
         };
         var value = (float)await adapter.ReadRawAsync(tag, CancellationToken.None);
 
-        value.Should().NotBe(1.0f);
+        value.Should().Be(BitConverter.Int32BitsToSingle(0x00003F80));
     }
 
     [Theory]

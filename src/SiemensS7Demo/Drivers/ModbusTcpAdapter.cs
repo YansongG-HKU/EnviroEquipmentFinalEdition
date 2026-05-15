@@ -77,17 +77,18 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
         }
 
         var bytes = registers.AsSpan(1, registerCount * 2).ToArray();
-        if (tag.DataType is TagDataType.DInt or TagDataType.Real)
+        if (tag.DataType is TagDataType.DInt or TagDataType.UInt32 or TagDataType.Real)
         {
             ApplyWordOrder(bytes, _wordOrder, fromWire: true);
         }
 
         return tag.DataType switch
         {
-            TagDataType.Int16 => BinaryPrimitives.ReadInt16BigEndian(bytes),
-            TagDataType.UInt16 => BinaryPrimitives.ReadUInt16BigEndian(bytes),
-            TagDataType.DInt => BinaryPrimitives.ReadInt32BigEndian(bytes),
-            TagDataType.Real => BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32BigEndian(bytes)),
+            TagDataType.Int16 => (object)BinaryPrimitives.ReadInt16BigEndian(bytes),
+            TagDataType.UInt16 => (object)BinaryPrimitives.ReadUInt16BigEndian(bytes),
+            TagDataType.DInt => (object)BinaryPrimitives.ReadInt32BigEndian(bytes),
+            TagDataType.UInt32 => (object)BinaryPrimitives.ReadUInt32BigEndian(bytes),
+            TagDataType.Real => (object)BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32BigEndian(bytes)),
             _ => throw new NotSupportedException($"Unsupported Modbus data type '{tag.DataType}'.")
         };
     }
@@ -132,11 +133,12 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
         var registerBytes = tag.DataType switch
         {
             TagDataType.DInt => EncodeInt32(Convert.ToInt32(value, CultureInfo.InvariantCulture)),
+            TagDataType.UInt32 => EncodeUInt32(Convert.ToUInt32(value, CultureInfo.InvariantCulture)),
             TagDataType.Real => EncodeReal(Convert.ToSingle(value, CultureInfo.InvariantCulture)),
             _ => throw new NotSupportedException($"Unsupported Modbus write type '{tag.DataType}'.")
         };
 
-        if (tag.DataType is TagDataType.DInt or TagDataType.Real)
+        if (tag.DataType is TagDataType.DInt or TagDataType.UInt32 or TagDataType.Real)
         {
             ApplyWordOrder(registerBytes, _wordOrder, fromWire: false);
         }
@@ -263,6 +265,13 @@ public sealed class ModbusTcpAdapter : IS7Adapter, IDisposable
     {
         var buffer = new byte[4];
         BinaryPrimitives.WriteInt32BigEndian(buffer, value);
+        return buffer;
+    }
+
+    private static byte[] EncodeUInt32(uint value)
+    {
+        var buffer = new byte[4];
+        BinaryPrimitives.WriteUInt32BigEndian(buffer, value);
         return buffer;
     }
 

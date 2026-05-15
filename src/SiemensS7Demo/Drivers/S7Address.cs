@@ -61,6 +61,7 @@ internal sealed record S7Address(
         TagDataType.Int16 => 2,
         TagDataType.UInt16 => 2,
         TagDataType.DInt => 4,
+        TagDataType.UInt32 => 4,
         TagDataType.Real => 4,
         _ => throw new NotSupportedException($"Unsupported tag data type '{dataType}'.")
     };
@@ -106,7 +107,7 @@ internal sealed record S7Address(
         {
             TagDataType.Bool => normalized is "X",
             TagDataType.Int16 or TagDataType.UInt16 => normalized is "W",
-            TagDataType.DInt or TagDataType.Real => normalized is "D",
+            TagDataType.DInt or TagDataType.UInt32 or TagDataType.Real => normalized is "D",
             _ => false
         };
 

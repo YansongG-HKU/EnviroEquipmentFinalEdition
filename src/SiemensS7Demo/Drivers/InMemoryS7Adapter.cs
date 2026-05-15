@@ -57,6 +57,7 @@ public sealed class InMemoryS7Adapter : IS7Adapter
             TagDataType.Int16 => (short)0,
             TagDataType.UInt16 => (ushort)0,
             TagDataType.DInt => 0,
+            TagDataType.UInt32 => (uint)0,
             TagDataType.Real => 0.0f,
             _ => 0
         };
