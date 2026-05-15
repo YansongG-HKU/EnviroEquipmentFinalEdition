@@ -18,25 +18,46 @@ internal sealed record ModbusAddress(string Area, int Offset)
         var area = match.Groups["area"].Value.ToUpperInvariant();
         var offset = int.Parse(match.Groups["offset"].Value);
 
-        if (tag.DataType == TagDataType.Bool && area is not ("C" or "COIL" or "DI"))
+        switch (tag.DataType)
         {
-            throw new FormatException($"Bool Modbus tag '{tag.Name}' must use C/COIL or DI address.");
-        }
+            case TagDataType.Bool:
+                if (area is not ("C" or "COIL" or "DI"))
+                {
+                    throw new FormatException($"Bool Modbus tag '{tag.Name}' must use C/COIL or DI address.");
+                }
+                break;
 
-        if (tag.DataType == TagDataType.Real)
-        {
-            if (area != "HRF")
-            {
-                throw new FormatException($"Float Modbus tag '{tag.Name}' must use HRF address (got '{area}').");
-            }
-        }
-        else if (tag.DataType != TagDataType.Bool && area is not ("HR" or "IR"))
-        {
-            throw new FormatException($"Numeric Modbus tag '{tag.Name}' must use HR or IR address.");
-        }
-        else if (tag.DataType != TagDataType.Real && area == "HRF")
-        {
-            throw new FormatException($"HRF address on tag '{tag.Name}' is reserved for Real data type.");
+            case TagDataType.Int16:
+            case TagDataType.UInt16:
+                if (area is not ("HR" or "IR"))
+                {
+                    throw new FormatException($"16-bit Modbus tag '{tag.Name}' must use HR or IR address (got '{area}').");
+                }
+                break;
+
+            case TagDataType.DInt:
+                if (area != "HRD")
+                {
+                    throw new FormatException($"Signed 32-bit Modbus tag '{tag.Name}' must use HRD address (got '{area}').");
+                }
+                break;
+
+            case TagDataType.UInt32:
+                if (area != "HRDU")
+                {
+                    throw new FormatException($"Unsigned 32-bit Modbus tag '{tag.Name}' must use HRDU address (got '{area}').");
+                }
+                break;
+
+            case TagDataType.Real:
+                if (area != "HRF")
+                {
+                    throw new FormatException($"Float Modbus tag '{tag.Name}' must use HRF address (got '{area}').");
+                }
+                break;
+
+            default:
+                throw new FormatException($"Unsupported tag data type '{tag.DataType}' on Modbus.");
         }
 
         return new ModbusAddress(area, offset);
@@ -44,11 +65,12 @@ internal sealed record ModbusAddress(string Area, int Offset)
 
     public bool IsCoil => Area is "C" or "COIL";
     public bool IsDiscreteInput => Area == "DI";
-    public bool IsHoldingRegister => Area is "HR" or "HRF";
+    public bool IsHoldingRegister => Area is "HR" or "HRF" or "HRD" or "HRDU";
     public bool IsInputRegister => Area == "IR";
     public bool IsFloatRegister => Area == "HRF";
+    public bool IsDoubleRegister => Area is "HRD" or "HRDU";
 
     private static readonly Regex AddressRegex = new(
-        @"^(?<area>COIL|C|DI|HRF|HR|IR)(?<offset>\d+)$",
+        @"^(?<area>COIL|C|DI|HRDU|HRD|HRF|HR|IR)(?<offset>\d+)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 }
