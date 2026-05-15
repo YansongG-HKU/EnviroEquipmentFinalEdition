@@ -91,9 +91,10 @@ public sealed class SiemensS7Client : IPlcClient
             var batch = await _adapter.ReadRawBatchAsync(tags, cancellationToken);
             foreach (var tag in tags)
             {
+                TagValue hostValue;
                 if (!batch.TryGetValue(tag.Name, out var result))
                 {
-                    output[tag.Name] = new TagValue
+                    hostValue = new TagValue
                     {
                         Name = tag.Name,
                         DisplayName = tag.DisplayName,
@@ -104,12 +105,10 @@ public sealed class SiemensS7Client : IPlcClient
                         IsQualityGood = false,
                         QualityMessage = "Adapter omitted this tag from the batch result."
                     };
-                    continue;
                 }
-
-                if (!result.IsGood)
+                else if (!result.IsGood)
                 {
-                    output[tag.Name] = new TagValue
+                    hostValue = new TagValue
                     {
                         Name = tag.Name,
                         DisplayName = tag.DisplayName,
@@ -120,33 +119,40 @@ public sealed class SiemensS7Client : IPlcClient
                         IsQualityGood = false,
                         QualityMessage = result.Error
                     };
-                    continue;
                 }
-
-                var raw = result.Value!;
-                var converted = ConvertReadValue(tag, raw);
-                string? displayValue = null;
-                if (tag.Options.Count > 0)
+                else
                 {
-                    var rawLong = ToOptionKey(raw);
-                    if (rawLong.HasValue && tag.TryGetOptionLabel(rawLong.Value, out var label))
+                    var raw = result.Value!;
+                    var converted = ConvertReadValue(tag, raw);
+                    string? displayValue = null;
+                    if (tag.Options.Count > 0)
                     {
-                        displayValue = label;
+                        var rawLong = ToOptionKey(raw);
+                        if (rawLong.HasValue && tag.TryGetOptionLabel(rawLong.Value, out var label))
+                        {
+                            displayValue = label;
+                        }
                     }
+
+                    hostValue = new TagValue
+                    {
+                        Name = tag.Name,
+                        DisplayName = tag.DisplayName,
+                        Address = tag.Address,
+                        Unit = tag.Unit,
+                        RawValue = raw,
+                        Value = converted,
+                        DisplayValue = displayValue,
+                        TimestampUtc = DateTime.UtcNow,
+                        IsQualityGood = true
+                    };
                 }
 
-                output[tag.Name] = new TagValue
+                output[tag.Name] = hostValue;
+                foreach (var derivation in tag.BitDerivations)
                 {
-                    Name = tag.Name,
-                    DisplayName = tag.DisplayName,
-                    Address = tag.Address,
-                    Unit = tag.Unit,
-                    RawValue = raw,
-                    Value = converted,
-                    DisplayValue = displayValue,
-                    TimestampUtc = DateTime.UtcNow,
-                    IsQualityGood = true
-                };
+                    output[derivation.Name] = BuildDerivedTagValue(tag, derivation, hostValue);
+                }
             }
         }
         finally
@@ -201,4 +207,37 @@ public sealed class SiemensS7Client : IPlcClient
         uint u2 => u2,
         _ => null
     };
+
+    private static TagValue BuildDerivedTagValue(TagDefinition host, BitDerivation derivation, TagValue hostValue)
+    {
+        if (!hostValue.IsQualityGood)
+        {
+            return new TagValue
+            {
+                Name = derivation.Name,
+                DisplayName = derivation.DisplayName ?? derivation.Name,
+                Address = $"{host.Address}.{derivation.BitOffset}",
+                Unit = string.Empty,
+                Value = string.Empty,
+                TimestampUtc = hostValue.TimestampUtc,
+                IsQualityGood = false,
+                QualityMessage = hostValue.QualityMessage
+            };
+        }
+
+        var rawLong = ToOptionKey(hostValue.RawValue ?? 0) ?? 0L;
+        var bit = ((rawLong >> derivation.BitOffset) & 1L) == 1L;
+
+        return new TagValue
+        {
+            Name = derivation.Name,
+            DisplayName = derivation.DisplayName ?? derivation.Name,
+            Address = $"{host.Address}.{derivation.BitOffset}",
+            Unit = string.Empty,
+            RawValue = bit,
+            Value = bit,
+            TimestampUtc = hostValue.TimestampUtc,
+            IsQualityGood = true
+        };
+    }
 }
