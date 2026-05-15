@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <ParamType GroupName="状态">
+    <Param ParamName="压缩机运行">
+      <address>9</address>
+      <area>v</area>
+      <dbnumber>1</dbnumber>
+      <type>V</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+    <Param ParamName="加热运行">
+      <address>9</address>
+      <area>v</area>
+      <dbnumber>1</dbnumber>
+      <type>V</type>
+      <deviation>1</deviation>
+      <scale>0</scale>
+    </Param>
+    <Param ParamName="段开关量控制字">
+      <address>0</address>
+      <area>db</area>
+      <dbnumber>1</dbnumber>
+      <type>HRS（int16）</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+  </ParamType>
+  <ParamType GroupName="输出">
+    <Param ParamName="压缩机启动">
+      <address>80</address>
+      <area></area>
+      <dbnumber>0</dbnumber>
+      <type>Q</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+    <Param ParamName="加热启动">
+      <address>81</address>
+      <area></area>
+      <dbnumber>0</dbnumber>
+      <type>Q</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+  </ParamType>
+  <ParamType GroupName="手动辅助功能">
+    <Param ParamName="压缩机">
+      <control>压缩机启动</control>
+      <state>压缩机运行</state>
+    </Param>
+    <Param ParamName="加热">
+      <control>加热启动</control>
+      <state>加热运行</state>
+    </Param>
+  </ParamType>
+  <ParamType GroupName="程序辅助功能">
+    <Param ParamName="段开关量">
+      <control>段开关量控制字</control>
+      <programbitoffset>3</programbitoffset>
+    </Param>
+  </ParamType>
+</root>
