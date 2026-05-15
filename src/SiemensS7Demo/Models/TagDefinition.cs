@@ -31,6 +31,7 @@ public sealed class TagDefinition
     public double? Min { get; init; }
     public double? Max { get; init; }
     public IReadOnlyList<TagOption> Options { get; init; } = System.Array.Empty<TagOption>();
+    public IReadOnlyList<BitDerivation> BitDerivations { get; init; } = System.Array.Empty<BitDerivation>();
 
     public double ConvertRawToEngineering(double raw) => raw * Scale + Offset;
     public double ConvertEngineeringToRaw(double engineering) => (engineering - Offset) / Scale;

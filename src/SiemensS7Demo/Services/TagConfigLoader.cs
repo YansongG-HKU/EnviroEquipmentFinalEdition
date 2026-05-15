@@ -40,6 +40,13 @@ public static class TagConfigLoader
                 Required(opt, "name")))
             .ToList();
 
+        var derivations = element.Elements("DeviationList")
+            .Select(d => new BitDerivation(
+                Required(d, "name"),
+                int.Parse(Required(d, "deviation"), CultureInfo.InvariantCulture),
+                (string?)d.Attribute("displayName")))
+            .ToList();
+
         return new TagDefinition
         {
             Name = Required(element, "name"),
@@ -54,7 +61,8 @@ public static class TagConfigLoader
             SafeWrite = ParseBool(element, "safeWrite", false),
             Min = ParseNullableDouble(element, "min"),
             Max = ParseNullableDouble(element, "max"),
-            Options = options
+            Options = options,
+            BitDerivations = derivations
         };
     }
 
