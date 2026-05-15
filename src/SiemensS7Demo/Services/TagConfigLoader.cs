@@ -115,4 +115,58 @@ public static class TagConfigLoader
 
         throw new InvalidOperationException($"Unsupported {attributeName} value '{value}'.");
     }
+
+    /// <summary>
+    /// Pure synthesis function: given legacy XML fields, produces an (Address, DataType) pair.
+    /// Called by <see cref="LoadLegacy"/> and directly testable.
+    /// </summary>
+    internal static (string Address, TagDataType DataType) SynthesizeLegacyAddress(
+        string area, int dbnumber, int rawAddress, string type, int deviation)
+    {
+        // Normalize: strip parenthetical suffixes like "（int16）" or "（Real）"
+        var t = NormalizeLegacyType(type);
+        var isDb = string.Equals(area, "db", StringComparison.OrdinalIgnoreCase);
+
+        return t switch
+        {
+            // Siemens DB int16
+            "HRS" when isDb => ($"DB{dbnumber}.DBW{rawAddress}", TagDataType.Int16),
+
+            // Siemens DB real (HRF, RF, Real all mean float in a DB)
+            "HRF" or "RF" or "REAL" when isDb => ($"DB{dbnumber}.DBD{rawAddress}", TagDataType.Real),
+
+            // Siemens V-area bit (type=V anywhere, includes V-area PLCs)
+            "V" => ($"V{rawAddress}.{deviation}", TagDataType.Bool),
+
+            // Schneider coil (Q = discrete output coil)
+            "Q" => ($"C{rawAddress}", TagDataType.Bool),
+
+            // Schneider holding register int16
+            "HR" or "HRS" => ($"HR{rawAddress}", TagDataType.Int16),
+
+            // Schneider float
+            "HRF" or "RF" or "REAL" => ($"HRF{rawAddress}", TagDataType.Real),
+
+            // Schneider DInt (32-bit signed)
+            "HRD" => ($"HRD{rawAddress}", TagDataType.DInt),
+
+            // Schneider UInt32 (32-bit unsigned) — both legacy names map to HRDU
+            "HRU" or "HRDU" => ($"HRDU{rawAddress}", TagDataType.UInt32),
+
+            _ => throw new InvalidOperationException(
+                $"Unknown legacy type token '{type}' (normalized: '{t}'). " +
+                "Supported: HRS, HRF, RF, Real, V, Q, HR, HRD, HRU, HRDU.")
+        };
+    }
+
+    private static string NormalizeLegacyType(string raw)
+    {
+        // Strip parenthetical suffix: "HRS（int16）" → "HRS", "HRF（Real）" → "HRF"
+        var idx = raw.IndexOf('（');
+        var core = idx >= 0 ? raw[..idx] : raw;
+        // Also handle ASCII parenthesis just in case: "HRS(int16)" → "HRS"
+        idx = core.IndexOf('(');
+        core = idx >= 0 ? core[..idx] : core;
+        return core.Trim().ToUpperInvariant();
+    }
 }
