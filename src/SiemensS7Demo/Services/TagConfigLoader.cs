@@ -18,6 +18,15 @@ public static class TagConfigLoader
     /// <c>&lt;type&gt;</c>, <c>&lt;deviation&gt;</c>, <c>&lt;scale&gt;</c>.
     /// </summary>
     public static IReadOnlyList<TagDefinition> LoadLegacy(string configPath)
+        => LoadLegacy(configPath, out _);
+
+    /// <summary>
+    /// Loads a legacy <c>addressConfig.xml</c> file, returning both tag definitions and
+    /// auxiliary function metadata from <c>手动辅助功能</c> / <c>程序辅助功能</c> groups.
+    /// </summary>
+    public static IReadOnlyList<TagDefinition> LoadLegacy(
+        string configPath,
+        out IReadOnlyList<AuxiliaryFunction> auxiliaries)
     {
         if (!File.Exists(configPath))
         {
@@ -33,12 +42,21 @@ public static class TagConfigLoader
         }
 
         var tags = new List<TagDefinition>();
+        var auxList = new List<AuxiliaryFunction>();
+
         foreach (var paramType in document.Root!.Elements("ParamType"))
         {
             var groupName = (string?)paramType.Attribute("GroupName") ?? string.Empty;
-            foreach (var param in paramType.Elements("Param"))
+            if (IsAuxiliaryGroup(groupName))
             {
-                tags.Add(ParseLegacyParam(param, groupName));
+                auxList.AddRange(ParseAuxiliaryGroup(paramType, groupName));
+            }
+            else
+            {
+                foreach (var param in paramType.Elements("Param"))
+                {
+                    tags.Add(ParseLegacyParam(param, groupName));
+                }
             }
         }
 
@@ -47,6 +65,7 @@ public static class TagConfigLoader
             throw new InvalidOperationException($"No tags found in legacy file '{configPath}'.");
         }
 
+        auxiliaries = auxList;
         return tags;
     }
 
@@ -181,6 +200,36 @@ public static class TagConfigLoader
             Access = TagAccess.Read,
             SafeWrite = false
         };
+    }
+
+    private static bool IsAuxiliaryGroup(string groupName)
+        => groupName.Contains("辅助功能", StringComparison.Ordinal);
+
+    private static IEnumerable<AuxiliaryFunction> ParseAuxiliaryGroup(
+        XElement paramType, string groupName)
+    {
+        foreach (var param in paramType.Elements("Param"))
+        {
+            var control = param.Element("control")?.Value?.Trim();
+            if (string.IsNullOrWhiteSpace(control))
+            {
+                continue; // skip malformed entries silently
+            }
+
+            var state = param.Element("state")?.Value?.Trim();
+            var bitOffsetText = param.Element("programbitoffset")?.Value?.Trim();
+            int? programBitOffset = string.IsNullOrWhiteSpace(bitOffsetText)
+                ? null
+                : int.Parse(bitOffsetText, CultureInfo.InvariantCulture);
+
+            yield return new AuxiliaryFunction
+            {
+                Group = groupName,
+                ControlTagName = control,
+                StateTagName = string.IsNullOrWhiteSpace(state) ? null : state,
+                ProgramBitOffset = programBitOffset
+            };
+        }
     }
 
     private static string Required(XElement element, string name)
