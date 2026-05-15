@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Tags>
+    <Tag name="Temp" displayName="Temperature" group="PID" address="DB1.DBW336"
+         dataType="Int16" unit="degC" scale="10" scaleMode="Divisor"/>
+    <Tag name="Speed" displayName="Speed" group="Drive" address="MW0"
+         dataType="Int16" unit="rpm" scale="2"/>
+  </Tags>
+</Configuration>
