@@ -62,9 +62,21 @@ public static class ConfigValidationService
                 continue;
             }
 
-            if (tag.DataType != TagDataType.Bool && Math.Abs(tag.Scale) < double.Epsilon)
+            if (tag.DataType != TagDataType.Bool)
             {
-                issues.Add(Error(tagScope, "Scale must not be 0 for numeric tags."));
+                if (Math.Abs(tag.Scale) < double.Epsilon)
+                {
+                    if (tag.ScaleMode == ScaleMode.Divisor)
+                    {
+                        issues.Add(Error(tagScope,
+                            "Scale must not be 0 when ScaleMode is Divisor (division by zero). " +
+                            "Use Scale=1 with ScaleMode=Multiplier for no-op scaling."));
+                    }
+                    else
+                    {
+                        issues.Add(Error(tagScope, "Scale must not be 0 for numeric tags."));
+                    }
+                }
             }
 
             if (tag.Min.HasValue && tag.Max.HasValue && tag.Min.Value > tag.Max.Value)
