@@ -112,7 +112,7 @@ public static class ConfigValidationService
                 var maxBit = tag.DataType switch
                 {
                     TagDataType.Int16 or TagDataType.UInt16 => 15,
-                    TagDataType.DInt => 31,
+                    TagDataType.DInt or TagDataType.UInt32 => 31,
                     _ => -1
                 };
                 if (maxBit < 0)
