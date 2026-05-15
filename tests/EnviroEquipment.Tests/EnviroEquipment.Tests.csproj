@@ -29,6 +29,8 @@
     <None Update="Services/Fixtures/deviations.project.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/scalemode.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/scalemode.project.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Services/Fixtures/legacy_siemens_sample.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Services/Fixtures/legacy_schneider_sample.xml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

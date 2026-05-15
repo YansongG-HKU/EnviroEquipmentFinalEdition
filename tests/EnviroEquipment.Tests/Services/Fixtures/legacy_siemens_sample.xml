@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <ParamType GroupName="PID参数">
+    <Param ParamName="温度加热T0">
+      <address>336</address>
+      <area>db</area>
+      <dbnumber>1</dbnumber>
+      <type>HRS（int16）</type>
+      <deviation>0</deviation>
+      <scale>10</scale>
+    </Param>
+    <Param ParamName="温度加热T0实际值">
+      <address>340</address>
+      <area>db</area>
+      <dbnumber>1</dbnumber>
+      <type>HRF（Real）</type>
+      <deviation>0</deviation>
+      <scale>0</scale>
+    </Param>
+  </ParamType>
+  <ParamType GroupName="状态">
+    <Param ParamName="加热运行">
+      <address>9</address>
+      <area>v</area>
+      <dbnumber>1</dbnumber>
+      <type>V</type>
+      <deviation>6</deviation>
+      <scale>0</scale>
+    </Param>
+  </ParamType>
+</root>
