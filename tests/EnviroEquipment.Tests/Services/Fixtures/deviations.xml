@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Tags>
+    <Tag name="StatusWord" displayName="Status Word" group="Status" address="MW0" dataType="UInt16" unit="">
+      <DeviationList name="HeatRunning" deviation="0"/>
+      <DeviationList name="CoolRunning" deviation="3" displayName="Cool Running"/>
+    </Tag>
+  </Tags>
+</Configuration>
