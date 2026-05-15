@@ -1,0 +1,30 @@
+{
+  "projectId": "test",
+  "projectName": "test",
+  "devices": [
+    {
+      "id": "dev",
+      "name": "Dev",
+      "enabled": true,
+      "protocol": "mock",
+      "ip": "127.0.0.1",
+      "port": 102,
+      "cpuType": "Mock",
+      "pollingIntervalMs": 1000,
+      "tags": [
+        {
+          "name": "StatusWord",
+          "displayName": "Status Word",
+          "group": "Status",
+          "address": "MW0",
+          "dataType": "UInt16",
+          "unit": "",
+          "bitDerivations": [
+            { "name": "HeatRunning", "bitOffset": 0 },
+            { "name": "CoolRunning", "bitOffset": 3, "displayName": "Cool Running" }
+          ]
+        }
+      ]
+    }
+  ]
+}

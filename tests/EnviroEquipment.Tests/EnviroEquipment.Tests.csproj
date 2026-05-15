@@ -26,6 +26,7 @@
     <None Update="Services/Fixtures/options.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/options.project.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Services/Fixtures/deviations.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Services/Fixtures/deviations.project.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
