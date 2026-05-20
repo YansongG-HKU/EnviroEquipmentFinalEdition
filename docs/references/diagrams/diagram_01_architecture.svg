@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" font-family="'Noto Sans SC Thin','Noto Sans SC','Droid Sans Fallback',sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E141C"/>
+      <stop offset="1" stop-color="#070A0F"/>
+    </linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3FBDD0"/>
+    </marker>
+    <marker id="arrLight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7A8699"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="900" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="700" y="46" text-anchor="middle" font-size="22" font-weight="600" fill="#E6ECF5" letter-spacing="2">系统总体架构图</text>
+  <text x="700" y="70" text-anchor="middle" font-size="12" fill="#7A8699" letter-spacing="6">DEVICE LAYER · APPLICATION LAYER · LOCAL FILE LAYER</text>
+
+  <!-- Layer labels -->
+  <text x="40" y="160" font-size="11" fill="#3FBDD0" letter-spacing="3">现场设备层</text>
+  <text x="40" y="430" font-size="11" fill="#3FBDD0" letter-spacing="3">上位机软件</text>
+  <text x="40" y="780" font-size="11" fill="#3FBDD0" letter-spacing="3">本地文件层</text>
+
+  <!-- ========== DEVICE LAYER ========== -->
+  <rect x="40" y="100" width="1320" height="200" fill="#0F1722" stroke="#1E2430" stroke-width="1"/>
+
+  <!-- Schneider M221 -->
+  <g transform="translate(180,140)">
+    <rect width="200" height="120" fill="#11151C" stroke="#3A4458" stroke-width="1.5" rx="3"/>
+    <rect x="0" y="0" width="6" height="120" fill="#7E5BFF"/>
+    <text x="100" y="32" text-anchor="middle" font-size="10" fill="#7A8699" letter-spacing="2">SCHNEIDER · MODBUS</text>
+    <text x="100" y="62" text-anchor="middle" font-size="18" font-weight="600" fill="#E6ECF5">Modicon M221</text>
+    <text x="100" y="86" text-anchor="middle" font-size="11" fill="#A6B0C2">Modbus TCP / RTU</text>
+    <text x="100" y="104" text-anchor="middle" font-size="10" fill="#7A8699">读保持寄存器 / 线圈</text>
+  </g>
+
+  <!-- Siemens 200 SMART -->
+  <g transform="translate(450,140)">
+    <rect width="200" height="120" fill="#11151C" stroke="#3A4458" stroke-width="1.5" rx="3"/>
+    <rect x="0" y="0" width="6" height="120" fill="#3FBDD0"/>
+    <text x="100" y="32" text-anchor="middle" font-size="10" fill="#7A8699" letter-spacing="2">SIEMENS · S7</text>
+    <text x="100" y="62" text-anchor="middle" font-size="18" font-weight="600" fill="#E6ECF5">S7-200 SMART</text>
+    <text x="100" y="86" text-anchor="middle" font-size="11" fill="#A6B0C2">S7 协议 (Snap7)</text>
+    <text x="100" y="104" text-anchor="middle" font-size="10" fill="#7A8699">DB / V存储 块读写</text>
+  </g>
+
+  <!-- Siemens S7-1500 -->
+  <g transform="translate(720,140)">
+    <rect width="200" height="120" fill="#11151C" stroke="#3A4458" stroke-width="1.5" rx="3"/>
+    <rect x="0" y="0" width="6" height="120" fill="#3FBDD0"/>
+    <text x="100" y="32" text-anchor="middle" font-size="10" fill="#7A8699" letter-spacing="2">SIEMENS · S7</text>
+    <text x="100" y="62" text-anchor="middle" font-size="18" font-weight="600" fill="#E6ECF5">S7-1500</text>
+    <text x="100" y="86" text-anchor="middle" font-size="11" fill="#A6B0C2">S7 协议 / OUC</text>
+    <text x="100" y="104" text-anchor="middle" font-size="10" fill="#7A8699">优化 DB · 高速循环</text>
+  </g>
+
+  <!-- HMI -->
+  <g transform="translate(990,140)">
+    <rect width="160" height="120" fill="#11151C" stroke="#3A4458" stroke-width="1.5" rx="3"/>
+    <rect x="0" y="0" width="6" height="120" fill="#35C26B"/>
+    <text x="80" y="32" text-anchor="middle" font-size="10" fill="#7A8699" letter-spacing="2">LOCAL HMI</text>
+    <text x="80" y="62" text-anchor="middle" font-size="16" font-weight="600" fill="#E6ECF5">本地触摸屏</text>
+    <text x="80" y="92" text-anchor="middle" font-size="10" fill="#A6B0C2">本地/远程切换</text>
+  </g>
+
+  <!-- Chamber -->
+  <g transform="translate(1180,140)">
+    <rect width="160" height="120" fill="#11151C" stroke="#3A4458" stroke-width="1.5" rx="3"/>
+    <rect x="0" y="0" width="6" height="120" fill="#E0A04A"/>
+    <text x="80" y="32" text-anchor="middle" font-size="10" fill="#7A8699" letter-spacing="2">CHAMBER</text>
+    <text x="80" y="62" text-anchor="middle" font-size="16" font-weight="600" fill="#E6ECF5">试验箱本体</text>
+    <text x="80" y="84" text-anchor="middle" font-size="10" fill="#A6B0C2">温湿 / 低气压</text>
+    <text x="80" y="100" text-anchor="middle" font-size="10" fill="#A6B0C2">温度冲击</text>
+  </g>
+
+  <!-- Communication arrows up to App layer -->
+  <g stroke="#3FBDD0" stroke-width="1.4" fill="none" marker-end="url(#arr)">
+    <path d="M 280 260 Q 280 320 380 320 L 380 360"/>
+    <path d="M 550 260 L 550 360"/>
+    <path d="M 820 260 Q 820 320 720 320 L 720 360"/>
+  </g>
+  <text x="430" y="305" font-size="10" fill="#3FBDD0">TCP/IP 工业以太网 · 默认 502 / 102 端口</text>
+
+  <!-- ========== APPLICATION LAYER ========== -->
+  <rect x="40" y="360" width="1320" height="360" fill="#0F1722" stroke="#1E2430" stroke-width="1"/>
+
+  <!-- Communication layer -->
+  <g transform="translate(80,400)">
+    <rect width="280" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.2" rx="3"/>
+    <text x="140" y="26" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">COMMUNICATION 通信层</text>
+    <text x="140" y="50" text-anchor="middle" font-size="13" font-weight="500" fill="#E6ECF5">Modbus 驱动 · S7 驱动</text>
+    <text x="140" y="68" text-anchor="middle" font-size="10" fill="#7A8699">统一接口 IPlcClient · 批量读写 · 重连</text>
+  </g>
+
+  <g transform="translate(400,400)">
+    <rect width="280" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.2" rx="3"/>
+    <text x="140" y="26" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">CONFIG 配置层</text>
+    <text x="140" y="50" text-anchor="middle" font-size="13" font-weight="500" fill="#E6ECF5">设备配置 · 协议 XML · 语言资源</text>
+    <text x="140" y="68" text-anchor="middle" font-size="10" fill="#7A8699">支持 ≤100 通道 · 中英文双语</text>
+  </g>
+
+  <g transform="translate(720,400)">
+    <rect width="280" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.2" rx="3"/>
+    <text x="140" y="26" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">DATA 数据层</text>
+    <text x="140" y="50" text-anchor="middle" font-size="13" font-weight="500" fill="#E6ECF5">实时缓存 · 分段存储 · 检索导出</text>
+    <text x="140" y="68" text-anchor="middle" font-size="10" fill="#7A8699">采样 1–120s · 自动续接 · CSV/Excel</text>
+  </g>
+
+  <g transform="translate(1040,400)">
+    <rect width="280" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.2" rx="3"/>
+    <text x="140" y="26" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">LOG 日志层</text>
+    <text x="140" y="50" text-anchor="middle" font-size="13" font-weight="500" fill="#E6ECF5">运行 · 通信 · 操作 · 报警 · 存储</text>
+    <text x="140" y="68" text-anchor="middle" font-size="10" fill="#7A8699">按日滚动 · 全部可追溯</text>
+  </g>
+
+  <!-- BIZ -->
+  <g transform="translate(160,510)">
+    <rect width="1080" height="80" fill="#11151C" stroke="#E0A04A" stroke-width="1.4" rx="3"/>
+    <text x="540" y="26" text-anchor="middle" font-size="11" fill="#E0A04A" letter-spacing="2">BUSINESS 业务层</text>
+    <text x="540" y="52" text-anchor="middle" font-size="14" font-weight="500" fill="#E6ECF5">设备状态管理 · 控制服务 · 程序服务 · 报警评估 · 采集调度</text>
+    <text x="540" y="70" text-anchor="middle" font-size="10" fill="#7A8699">单设备隔离 · 控制前置校验 · 异常分级处理</text>
+  </g>
+
+  <!-- UI -->
+  <g transform="translate(160,620)">
+    <rect width="1080" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.4" rx="3"/>
+    <text x="540" y="26" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">UI INTERFACE 界面层</text>
+    <text x="540" y="52" text-anchor="middle" font-size="14" font-weight="500" fill="#E6ECF5">总览监控 · 当前试验 · 程序编辑 · 历史试验 · 报警中心 · LIMS 接口 · 监控布局 · 设备接入 · 设备维护 · 用户与权限</text>
+    <text x="540" y="70" text-anchor="middle" font-size="10" fill="#7A8699">夜班暗色主题 · 中英文切换 · 多分辨率自适应</text>
+  </g>
+
+  <!-- Internal arrows -->
+  <g stroke="#7A8699" stroke-width="1" fill="none" marker-end="url(#arrLight)" stroke-dasharray="3,3">
+    <path d="M 700 620 L 700 590"/>
+    <path d="M 700 510 L 700 480"/>
+    <path d="M 220 510 L 220 480"/>
+    <path d="M 1180 510 L 1180 480"/>
+  </g>
+
+  <!-- ========== FILE LAYER ========== -->
+  <rect x="40" y="730" width="1320" height="130" fill="#0F1722" stroke="#1E2430" stroke-width="1"/>
+
+  <g font-size="11" fill="#A6B0C2">
+    <g transform="translate(120,770)">
+      <rect width="190" height="60" fill="#161B24" stroke="#2A3240" rx="2"/>
+      <text x="95" y="22" text-anchor="middle" fill="#E0A04A" font-size="10" letter-spacing="2">CONFIG/</text>
+      <text x="95" y="42" text-anchor="middle">设备配置 / 协议XML</text>
+      <text x="95" y="55" text-anchor="middle" font-size="9" fill="#7A8699">devices.json · protocols/*.xml</text>
+    </g>
+    <g transform="translate(360,770)">
+      <rect width="190" height="60" fill="#161B24" stroke="#2A3240" rx="2"/>
+      <text x="95" y="22" text-anchor="middle" fill="#3FBDD0" font-size="10" letter-spacing="2">DATA/</text>
+      <text x="95" y="42" text-anchor="middle">分设备 · 分日 · 分段</text>
+      <text x="95" y="55" text-anchor="middle" font-size="9" fill="#7A8699">Device_001/2026-04-24/...</text>
+    </g>
+    <g transform="translate(600,770)">
+      <rect width="190" height="60" fill="#161B24" stroke="#2A3240" rx="2"/>
+      <text x="95" y="22" text-anchor="middle" fill="#35C26B" font-size="10" letter-spacing="2">LOGS/</text>
+      <text x="95" y="42" text-anchor="middle">运行 / 通信 / 操作 / 报警</text>
+      <text x="95" y="55" text-anchor="middle" font-size="9" fill="#7A8699">按日分文件 · 滚动归档</text>
+    </g>
+    <g transform="translate(840,770)">
+      <rect width="190" height="60" fill="#161B24" stroke="#2A3240" rx="2"/>
+      <text x="95" y="22" text-anchor="middle" fill="#7E5BFF" font-size="10" letter-spacing="2">BACKUP/</text>
+      <text x="95" y="42" text-anchor="middle">配置自动备份</text>
+      <text x="95" y="55" text-anchor="middle" font-size="9" fill="#7A8699">保存前快照 · 一键回滚</text>
+    </g>
+    <g transform="translate(1080,770)">
+      <rect width="190" height="60" fill="#161B24" stroke="#2A3240" rx="2"/>
+      <text x="95" y="22" text-anchor="middle" fill="#E0ECF5" font-size="10" letter-spacing="2">I18N/</text>
+      <text x="95" y="42" text-anchor="middle">语言资源</text>
+      <text x="95" y="55" text-anchor="middle" font-size="9" fill="#7A8699">zh-CN.json · en-US.json</text>
+    </g>
+  </g>
+
+  <!-- Arrows from app to files -->
+  <g stroke="#7A8699" stroke-width="1" fill="none" marker-end="url(#arrLight)">
+    <path d="M 540 700 L 540 770"/>
+    <path d="M 860 700 L 860 770"/>
+    <path d="M 1180 700 L 1180 770"/>
+  </g>
+
+  <!-- Footer note -->
+  <text x="700" y="888" text-anchor="middle" font-size="10" fill="#4F596E" letter-spacing="3">SINGLE-MACHINE WINDOWS DEPLOYMENT · OFFLINE CAPABLE · 30+ DAYS CONTINUOUS OPERATION</text>
+</svg>

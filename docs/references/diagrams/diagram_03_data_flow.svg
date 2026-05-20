@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 720" font-family="'Noto Sans SC Thin','Noto Sans SC','Droid Sans Fallback',sans-serif">
+  <defs>
+    <linearGradient id="bgD" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E141C"/>
+      <stop offset="1" stop-color="#070A0F"/>
+    </linearGradient>
+    <marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3FBDD0"/>
+    </marker>
+    <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7A8699"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="720" fill="url(#bgD)"/>
+
+  <text x="700" y="46" text-anchor="middle" font-size="22" font-weight="600" fill="#E6ECF5" letter-spacing="2">数据采集 · 缓存 · 分段存储 · 检索回放 全链路</text>
+  <text x="700" y="70" text-anchor="middle" font-size="12" fill="#7A8699" letter-spacing="6">END-TO-END DATA PIPELINE</text>
+
+  <!-- Lane labels -->
+  <g font-size="10" fill="#3FBDD0" letter-spacing="3">
+    <text x="40" y="160">采集</text>
+    <text x="40" y="290">实时</text>
+    <text x="40" y="420">存储</text>
+    <text x="40" y="560">回放</text>
+  </g>
+  <line x1="100" y1="105" x2="100" y2="640" stroke="#1E2430" stroke-width="1"/>
+
+  <!-- Row 1: Acquisition -->
+  <g transform="translate(140,120)">
+    <rect width="180" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="90" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">SCHEDULER</text>
+    <text x="90" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">采集调度器</text>
+    <text x="90" y="68" text-anchor="middle" font-size="10" fill="#7A8699">周期 1–120s · 默认 1s</text>
+  </g>
+  <g transform="translate(360,120)">
+    <rect width="180" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="90" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">PLC READ</text>
+    <text x="90" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">批量读取地址</text>
+    <text x="90" y="68" text-anchor="middle" font-size="10" fill="#7A8699">批量打包 · 减少往返</text>
+  </g>
+  <g transform="translate(580,120)">
+    <rect width="180" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="90" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">PARSER</text>
+    <text x="90" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">解析与缩放</text>
+    <text x="90" y="68" text-anchor="middle" font-size="10" fill="#7A8699">类型转换 · scale/offset</text>
+  </g>
+  <g transform="translate(800,120)">
+    <rect width="180" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="90" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">SAMPLE RECORD</text>
+    <text x="90" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">采样记录</text>
+    <text x="90" y="68" text-anchor="middle" font-size="10" fill="#7A8699">时间戳 · 通道值 · 质量</text>
+  </g>
+  <g transform="translate(1020,120)">
+    <rect width="320" height="80" fill="#11151C" stroke="#E0A04A" rx="3"/>
+    <text x="160" y="28" text-anchor="middle" font-size="11" fill="#E0A04A" letter-spacing="2">FAN-OUT 一次采集 · 多路消费</text>
+    <text x="160" y="52" text-anchor="middle" font-size="12" fill="#E6ECF5">界面 / 曲线 / 报警 / 存储 并行触发</text>
+    <text x="160" y="70" text-anchor="middle" font-size="10" fill="#7A8699">单设备异常隔离 · 不阻塞其他设备</text>
+  </g>
+
+  <!-- Arrows row 1 -->
+  <g stroke="#3FBDD0" stroke-width="1.4" fill="none" marker-end="url(#arrD)">
+    <path d="M 320 160 L 360 160"/>
+    <path d="M 540 160 L 580 160"/>
+    <path d="M 760 160 L 800 160"/>
+    <path d="M 980 160 L 1020 160"/>
+  </g>
+
+  <!-- Row 2: Realtime fanout -->
+  <g transform="translate(220,260)">
+    <rect width="200" height="80" fill="#11151C" stroke="#35C26B" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#35C26B" letter-spacing="2">UI DISPLAY</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">界面读数刷新</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">设备卡 · 详情 · 状态条</text>
+  </g>
+  <g transform="translate(460,260)">
+    <rect width="200" height="80" fill="#11151C" stroke="#35C26B" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#35C26B" letter-spacing="2">CURVE BUFFER</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">曲线缓存（限长）</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">滑动窗口 · 自动降采样</text>
+  </g>
+  <g transform="translate(700,260)">
+    <rect width="200" height="80" fill="#11151C" stroke="#E0433A" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#E0433A" letter-spacing="2">ALARM EVAL</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">报警规则判断</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">上下限 · 偏差 · 持续时长</text>
+  </g>
+  <g transform="translate(940,260)">
+    <rect width="200" height="80" fill="#11151C" stroke="#7E5BFF" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#7E5BFF" letter-spacing="2">STORAGE QUEUE</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">写入队列（异步）</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">不阻塞采集与界面</text>
+  </g>
+
+  <!-- Connectors from fanout into row 2 -->
+  <g stroke="#7A8699" stroke-width="1" fill="none" marker-end="url(#arrG)">
+    <path d="M 1100 200 L 1100 230 L 320 230 L 320 260"/>
+    <path d="M 1100 230 L 560 230 L 560 260"/>
+    <path d="M 1100 230 L 800 230 L 800 260"/>
+    <path d="M 1100 230 L 1040 230 L 1040 260"/>
+  </g>
+
+  <!-- Row 3: Storage details -->
+  <g transform="translate(220,400)">
+    <rect width="220" height="80" fill="#11151C" stroke="#7E5BFF" rx="3"/>
+    <text x="110" y="28" text-anchor="middle" font-size="11" fill="#7E5BFF" letter-spacing="2">SEGMENTATION</text>
+    <text x="110" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">自动分段写入</text>
+    <text x="110" y="68" text-anchor="middle" font-size="10" fill="#7A8699">按时长 / 按大小 滚动</text>
+  </g>
+  <g transform="translate(480,400)">
+    <rect width="220" height="80" fill="#11151C" stroke="#7E5BFF" rx="3"/>
+    <text x="110" y="28" text-anchor="middle" font-size="11" fill="#7E5BFF" letter-spacing="2">LOCAL FILES</text>
+    <text x="110" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">分设备 / 分日 目录</text>
+    <text x="110" y="68" text-anchor="middle" font-size="10" fill="#7A8699">CSV · 易拷贝易备份</text>
+  </g>
+  <g transform="translate(740,400)">
+    <rect width="220" height="80" fill="#11151C" stroke="#7E5BFF" rx="3"/>
+    <text x="110" y="28" text-anchor="middle" font-size="11" fill="#7E5BFF" letter-spacing="2">INDEX</text>
+    <text x="110" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">历史数据索引</text>
+    <text x="110" y="68" text-anchor="middle" font-size="10" fill="#7A8699">文件级时间索引 · 快速跳转</text>
+  </g>
+
+  <!-- Sample CSV preview box -->
+  <g transform="translate(1000,400)">
+    <rect width="340" height="120" fill="#161B24" stroke="#2A3240" rx="3"/>
+    <text x="14" y="22" font-size="10" fill="#7A8699" letter-spacing="2">DEVICE_001 / 2026-04-24 / 0001.CSV</text>
+    <g font-family="'DejaVu Sans Mono',monospace" font-size="10" fill="#A6B0C2">
+      <text x="14" y="46">sample_time, comm_state, TEMP_ACT, HUM_ACT, RUN_STATE</text>
+      <text x="14" y="64" fill="#3FBDD0">2026-04-24 10:00:01, Online, 25.1, 60.2, Running</text>
+      <text x="14" y="82" fill="#3FBDD0">2026-04-24 10:00:02, Online, 25.2, 60.1, Running</text>
+      <text x="14" y="100" fill="#E0A04A">2026-04-24 10:00:03, Timeout, , , Running</text>
+      <text x="14" y="112" fill="#7A8699">…  失败行保留通信状态，不"顶替"前值</text>
+    </g>
+  </g>
+
+  <g stroke="#7A8699" stroke-width="1" fill="none" marker-end="url(#arrG)">
+    <path d="M 1040 340 L 1040 380 L 330 380 L 330 400"/>
+    <path d="M 440 440 L 480 440"/>
+    <path d="M 700 440 L 740 440"/>
+    <path d="M 960 440 L 1000 440"/>
+  </g>
+
+  <!-- Row 4: Replay -->
+  <g transform="translate(140,540)">
+    <rect width="200" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">USER QUERY</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">选设备 + 时间范围</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">支持跨段跨日</text>
+  </g>
+  <g transform="translate(380,540)">
+    <rect width="200" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">FILE LOOKUP</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">索引定位文件</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">一次或多个段</text>
+  </g>
+  <g transform="translate(620,540)">
+    <rect width="200" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">CONCAT &amp; SORT</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">读取 · 拼接 · 排序</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">按采样时间还原</text>
+  </g>
+  <g transform="translate(860,540)">
+    <rect width="200" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">CURVE REPLAY</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">历史曲线回看</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">十字光标 · 多窗对比</text>
+  </g>
+  <g transform="translate(1100,540)">
+    <rect width="200" height="80" fill="#11151C" stroke="#3FBDD0" rx="3"/>
+    <text x="100" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">EXPORT</text>
+    <text x="100" y="50" text-anchor="middle" font-size="13" fill="#E6ECF5">CSV / Excel 导出</text>
+    <text x="100" y="68" text-anchor="middle" font-size="10" fill="#7A8699">通道选择 · 重采样</text>
+  </g>
+
+  <g stroke="#3FBDD0" stroke-width="1.4" fill="none" marker-end="url(#arrD)">
+    <path d="M 340 580 L 380 580"/>
+    <path d="M 580 580 L 620 580"/>
+    <path d="M 820 580 L 860 580"/>
+    <path d="M 1060 580 L 1100 580"/>
+  </g>
+
+  <!-- back arrow from index to file lookup -->
+  <g stroke="#7A8699" stroke-width="1" fill="none" stroke-dasharray="3,3" marker-end="url(#arrG)">
+    <path d="M 850 480 Q 850 510 480 510 L 480 540"/>
+  </g>
+  <text x="700" y="503" text-anchor="middle" font-size="9" fill="#7A8699">使用索引定位</text>
+</svg>

@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 720" font-family="'Noto Sans SC Thin','Noto Sans SC','Droid Sans Fallback',sans-serif">
+  <defs>
+    <linearGradient id="bgG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E141C"/>
+      <stop offset="1" stop-color="#070A0F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="720" fill="url(#bgG)"/>
+
+  <text x="700" y="46" text-anchor="middle" font-size="22" font-weight="600" fill="#E6ECF5" letter-spacing="2">项目实施路线图（6 个月 · 4 阶段 · 16 任务）</text>
+  <text x="700" y="70" text-anchor="middle" font-size="12" fill="#7A8699" letter-spacing="6">PROJECT GANTT · MAY 2026 → NOV 2026</text>
+
+  <!-- Time axis -->
+  <g transform="translate(280,110)">
+    <line x1="0" y1="20" x2="1080" y2="20" stroke="#3A4458"/>
+    <g font-size="10" fill="#7A8699" letter-spacing="2">
+      <text x="0" y="14" text-anchor="middle">5月</text>
+      <text x="180" y="14" text-anchor="middle">6月</text>
+      <text x="360" y="14" text-anchor="middle">7月</text>
+      <text x="540" y="14" text-anchor="middle">8月</text>
+      <text x="720" y="14" text-anchor="middle">9月</text>
+      <text x="900" y="14" text-anchor="middle">10月</text>
+      <text x="1080" y="14" text-anchor="middle">11月</text>
+    </g>
+    <g stroke="#1E2430" stroke-dasharray="2,3">
+      <line x1="0" y1="20" x2="0" y2="540"/>
+      <line x1="180" y1="20" x2="180" y2="540"/>
+      <line x1="360" y1="20" x2="360" y2="540"/>
+      <line x1="540" y1="20" x2="540" y2="540"/>
+      <line x1="720" y1="20" x2="720" y2="540"/>
+      <line x1="900" y1="20" x2="900" y2="540"/>
+      <line x1="1080" y1="20" x2="1080" y2="540"/>
+    </g>
+  </g>
+
+  <!-- Phase labels -->
+  <g font-size="11" fill="#3FBDD0" letter-spacing="2">
+    <text x="50" y="170">阶段一</text>
+    <text x="50" y="190" font-size="9" fill="#7A8699">需求 / 设计</text>
+    <text x="50" y="290">阶段二</text>
+    <text x="50" y="310" font-size="9" fill="#7A8699">核心开发</text>
+    <text x="50" y="420">阶段三</text>
+    <text x="50" y="440" font-size="9" fill="#7A8699">集成 / 优化</text>
+    <text x="50" y="550">阶段四</text>
+    <text x="50" y="570" font-size="9" fill="#7A8699">联调 / 交付</text>
+  </g>
+
+  <!-- Task labels and bars -->
+  <g font-size="11" fill="#A6B0C2">
+    <!-- Phase 1 -->
+    <text x="270" y="158" text-anchor="end">需求调研与资料确认</text>
+    <rect x="280" y="148" width="90" height="14" fill="#3FBDD0" rx="2"/>
+
+    <text x="270" y="183" text-anchor="end">概要设计</text>
+    <rect x="370" y="173" width="90" height="14" fill="#3FBDD0" rx="2"/>
+
+    <text x="270" y="208" text-anchor="end">详细设计</text>
+    <rect x="460" y="198" width="120" height="14" fill="#3FBDD0" rx="2"/>
+
+    <!-- Phase 2 -->
+    <text x="270" y="258" text-anchor="end">通信模块开发</text>
+    <rect x="490" y="248" width="120" height="14" fill="#7E5BFF" rx="2"/>
+
+    <text x="270" y="283" text-anchor="end">配置模块开发</text>
+    <rect x="490" y="273" width="120" height="14" fill="#7E5BFF" rx="2"/>
+
+    <text x="270" y="308" text-anchor="end">设备管理与界面开发</text>
+    <rect x="550" y="298" width="150" height="14" fill="#7E5BFF" rx="2"/>
+
+    <text x="270" y="333" text-anchor="end">数据采集与存储</text>
+    <rect x="580" y="323" width="150" height="14" fill="#7E5BFF" rx="2"/>
+
+    <text x="270" y="358" text-anchor="end">控制与程序模式</text>
+    <rect x="610" y="348" width="150" height="14" fill="#7E5BFF" rx="2"/>
+
+    <!-- Phase 3 -->
+    <text x="270" y="388" text-anchor="end">曲线与历史回看</text>
+    <rect x="730" y="378" width="120" height="14" fill="#E0A04A" rx="2"/>
+
+    <text x="270" y="413" text-anchor="end">报警与日志</text>
+    <rect x="730" y="403" width="120" height="14" fill="#E0A04A" rx="2"/>
+
+    <text x="270" y="438" text-anchor="end">中英文与配置工具</text>
+    <rect x="790" y="428" width="90" height="14" fill="#E0A04A" rx="2"/>
+
+    <text x="270" y="463" text-anchor="end">集成测试</text>
+    <rect x="850" y="453" width="90" height="14" fill="#E0A04A" rx="2"/>
+
+    <!-- Phase 4 -->
+    <text x="270" y="493" text-anchor="end">现场联调（天津）</text>
+    <rect x="940" y="483" width="120" height="14" fill="#35C26B" rx="2"/>
+
+    <text x="270" y="518" text-anchor="end">30天稳定性测试</text>
+    <rect x="1000" y="508" width="180" height="14" fill="#35C26B" rx="2"/>
+
+    <text x="270" y="543" text-anchor="end">问题修复 / 版本收敛</text>
+    <rect x="1060" y="533" width="90" height="14" fill="#35C26B" rx="2"/>
+
+    <text x="270" y="568" text-anchor="end">验收与交付</text>
+    <rect x="1180" y="558" width="60" height="14" fill="#35C26B" rx="2"/>
+  </g>
+
+  <!-- Milestones -->
+  <g>
+    <line x1="460" y1="120" x2="460" y2="600" stroke="#E0A04A" stroke-dasharray="3,3" opacity="0.6"/>
+    <text x="460" y="115" text-anchor="middle" font-size="10" fill="#E0A04A">M1 设计冻结</text>
+    <line x1="940" y1="120" x2="940" y2="600" stroke="#E0A04A" stroke-dasharray="3,3" opacity="0.6"/>
+    <text x="940" y="115" text-anchor="middle" font-size="10" fill="#E0A04A">M2 现场就绪</text>
+    <line x1="1240" y1="120" x2="1240" y2="600" stroke="#35C26B" stroke-dasharray="3,3" opacity="0.6"/>
+    <text x="1240" y="115" text-anchor="middle" font-size="10" fill="#35C26B">M3 验收</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(280,640)" font-size="11" fill="#A6B0C2">
+    <g><rect width="14" height="14" fill="#3FBDD0" rx="2"/><text x="22" y="11">阶段一 需求与设计</text></g>
+    <g transform="translate(180,0)"><rect width="14" height="14" fill="#7E5BFF" rx="2"/><text x="22" y="11">阶段二 核心开发</text></g>
+    <g transform="translate(360,0)"><rect width="14" height="14" fill="#E0A04A" rx="2"/><text x="22" y="11">阶段三 集成与优化</text></g>
+    <g transform="translate(540,0)"><rect width="14" height="14" fill="#35C26B" rx="2"/><text x="22" y="11">阶段四 联调与交付</text></g>
+    <g transform="translate(720,0)"><line x1="0" y1="7" x2="14" y2="7" stroke="#E0A04A" stroke-dasharray="3,2"/><text x="22" y="11">里程碑</text></g>
+  </g>
+</svg>

@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 740" font-family="'Noto Sans SC Thin','Noto Sans SC','Droid Sans Fallback',sans-serif">
+  <defs>
+    <linearGradient id="bgU" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E141C"/>
+      <stop offset="1" stop-color="#070A0F"/>
+    </linearGradient>
+    <marker id="arrU" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3FBDD0"/>
+    </marker>
+    <marker id="arrU2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7A8699"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="740" fill="url(#bgU)"/>
+
+  <text x="700" y="46" text-anchor="middle" font-size="22" font-weight="600" fill="#E6ECF5" letter-spacing="2">界面双场景导航与状态流</text>
+  <text x="700" y="70" text-anchor="middle" font-size="12" fill="#7A8699" letter-spacing="6">CENTRALIZED VIEW + SINGLE-DEVICE DETAIL</text>
+
+  <!-- Login -->
+  <g transform="translate(80,120)">
+    <rect width="220" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.4" rx="3"/>
+    <text x="110" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">SCREEN 0</text>
+    <text x="110" y="52" text-anchor="middle" font-size="14" fill="#E6ECF5">登录 / 角色选择</text>
+    <text x="110" y="70" text-anchor="middle" font-size="10" fill="#7A8699">操作员 / 工程师 / 管理员</text>
+  </g>
+
+  <!-- Overview hub -->
+  <g transform="translate(380,120)">
+    <rect width="260" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.6" rx="3"/>
+    <text x="130" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">SCREEN 1 · HUB</text>
+    <text x="130" y="52" text-anchor="middle" font-size="14" fill="#E6ECF5">总览监控（多设备）</text>
+    <text x="130" y="70" text-anchor="middle" font-size="10" fill="#7A8699">最多 32 台 · 网格 2×2 / 3×3 / 4×4</text>
+  </g>
+
+  <g stroke="#3FBDD0" stroke-width="1.4" fill="none" marker-end="url(#arrU)">
+    <path d="M 300 160 L 380 160"/>
+  </g>
+
+  <!-- Right side - layout designer -->
+  <g transform="translate(720,120)">
+    <rect width="240" height="80" fill="#11151C" stroke="#7E5BFF" stroke-width="1.2" rx="3"/>
+    <text x="120" y="28" text-anchor="middle" font-size="11" fill="#7E5BFF" letter-spacing="2">监控布局编辑</text>
+    <text x="120" y="52" text-anchor="middle" font-size="13" fill="#E6ECF5">拖拽布局 · 多页保存</text>
+    <text x="120" y="70" text-anchor="middle" font-size="10" fill="#7A8699">不同岗位定制工位</text>
+  </g>
+  <g stroke="#7A8699" stroke-width="1" fill="none" marker-end="url(#arrU2)" stroke-dasharray="3,3">
+    <path d="M 640 160 L 720 160"/>
+  </g>
+
+  <g transform="translate(1000,120)">
+    <rect width="240" height="80" fill="#11151C" stroke="#E0A04A" stroke-width="1.2" rx="3"/>
+    <text x="120" y="28" text-anchor="middle" font-size="11" fill="#E0A04A" letter-spacing="2">报警中心</text>
+    <text x="120" y="52" text-anchor="middle" font-size="13" fill="#E6ECF5">未确认 / 历史 / 已屏蔽</text>
+    <text x="120" y="70" text-anchor="middle" font-size="10" fill="#7A8699">不弹窗 · 顶栏徽章入口</text>
+  </g>
+  <g stroke="#E0A04A" stroke-width="1.2" fill="none" marker-end="url(#arrU)" stroke-dasharray="3,3">
+    <path d="M 640 200 Q 640 250 1120 250 L 1120 200"/>
+  </g>
+
+  <!-- Single device detail -->
+  <g transform="translate(380,260)">
+    <rect width="260" height="80" fill="#11151C" stroke="#3FBDD0" stroke-width="1.6" rx="3"/>
+    <text x="130" y="28" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">SCREEN 2 · DETAIL</text>
+    <text x="130" y="52" text-anchor="middle" font-size="14" fill="#E6ECF5">当前试验 / 单设备详情</text>
+    <text x="130" y="70" text-anchor="middle" font-size="10" fill="#7A8699">读数 + 实时曲线 + 控制操作</text>
+  </g>
+  <g stroke="#3FBDD0" stroke-width="1.4" fill="none" marker-end="url(#arrU)">
+    <path d="M 510 200 L 510 260"/>
+  </g>
+  <text x="525" y="232" font-size="10" fill="#7A8699">点击设备卡</text>
+
+  <!-- Detail children -->
+  <g transform="translate(80,400)">
+    <rect width="220" height="74" fill="#11151C" stroke="#E0A04A" stroke-width="1.2" rx="3"/>
+    <text x="110" y="26" text-anchor="middle" font-size="11" fill="#E0A04A" letter-spacing="2">手动控制</text>
+    <text x="110" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">设定值下发 · 风机/压缩机</text>
+    <text x="110" y="64" text-anchor="middle" font-size="10" fill="#7A8699">前置校验 · 二次确认</text>
+  </g>
+  <g transform="translate(330,400)">
+    <rect width="220" height="74" fill="#11151C" stroke="#E0A04A" stroke-width="1.2" rx="3"/>
+    <text x="110" y="26" text-anchor="middle" font-size="11" fill="#E0A04A" letter-spacing="2">程序模式 / 程序编辑</text>
+    <text x="110" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">分段曲线 · 循环 · 跳步</text>
+    <text x="110" y="64" text-anchor="middle" font-size="10" fill="#7A8699">校验后整段下发</text>
+  </g>
+  <g transform="translate(580,400)">
+    <rect width="220" height="74" fill="#11151C" stroke="#3FBDD0" stroke-width="1.2" rx="3"/>
+    <text x="110" y="26" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">实时曲线</text>
+    <text x="110" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">多通道 · 双坐标 · 十字光标</text>
+    <text x="110" y="64" text-anchor="middle" font-size="10" fill="#7A8699">多窗口 · 自动降采样</text>
+  </g>
+  <g transform="translate(830,400)">
+    <rect width="220" height="74" fill="#11151C" stroke="#7E5BFF" stroke-width="1.2" rx="3"/>
+    <text x="110" y="26" text-anchor="middle" font-size="11" fill="#7E5BFF" letter-spacing="2">历史试验 / 回看</text>
+    <text x="110" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">按时间 / 按文件 检索</text>
+    <text x="110" y="64" text-anchor="middle" font-size="10" fill="#7A8699">跨段拼接 · 多曲线对比</text>
+  </g>
+  <g transform="translate(1080,400)">
+    <rect width="220" height="74" fill="#11151C" stroke="#7E5BFF" stroke-width="1.2" rx="3"/>
+    <text x="110" y="26" text-anchor="middle" font-size="11" fill="#7E5BFF" letter-spacing="2">导出</text>
+    <text x="110" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">CSV / Excel</text>
+    <text x="110" y="64" text-anchor="middle" font-size="10" fill="#7A8699">通道筛选 · 重采样间隔</text>
+  </g>
+
+  <!-- Detail to children arrows -->
+  <g stroke="#7A8699" stroke-width="1" fill="none" marker-end="url(#arrU2)">
+    <path d="M 510 340 L 510 365 L 190 365 L 190 400"/>
+    <path d="M 510 340 L 510 400"/>
+    <path d="M 510 340 L 510 365 L 690 365 L 690 400"/>
+    <path d="M 510 340 L 510 365 L 940 365 L 940 400"/>
+    <path d="M 510 340 L 510 365 L 1190 365 L 1190 400"/>
+  </g>
+
+  <!-- Bottom row: settings & integration -->
+  <g transform="translate(80,540)">
+    <rect width="240" height="74" fill="#11151C" stroke="#35C26B" stroke-width="1.2" rx="3"/>
+    <text x="120" y="26" text-anchor="middle" font-size="11" fill="#35C26B" letter-spacing="2">设备接入</text>
+    <text x="120" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">添加 / 修改 / 联调测试</text>
+    <text x="120" y="64" text-anchor="middle" font-size="10" fill="#7A8699">协议绑定 · 地址映射检查</text>
+  </g>
+  <g transform="translate(360,540)">
+    <rect width="240" height="74" fill="#11151C" stroke="#35C26B" stroke-width="1.2" rx="3"/>
+    <text x="120" y="26" text-anchor="middle" font-size="11" fill="#35C26B" letter-spacing="2">设备维护</text>
+    <text x="120" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">PID / 限值 / 工程参数</text>
+    <text x="120" y="64" text-anchor="middle" font-size="10" fill="#7A8699">读出/写入 设备参数表</text>
+  </g>
+  <g transform="translate(640,540)">
+    <rect width="240" height="74" fill="#11151C" stroke="#3FBDD0" stroke-width="1.2" rx="3"/>
+    <text x="120" y="26" text-anchor="middle" font-size="11" fill="#3FBDD0" letter-spacing="2">LIMS / 黑灯</text>
+    <text x="120" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">任务上线 / 进入设备 / 完成</text>
+    <text x="120" y="64" text-anchor="middle" font-size="10" fill="#7A8699">与 LIMS 系统对接</text>
+  </g>
+  <g transform="translate(920,540)">
+    <rect width="240" height="74" fill="#11151C" stroke="#35C26B" stroke-width="1.2" rx="3"/>
+    <text x="120" y="26" text-anchor="middle" font-size="11" fill="#35C26B" letter-spacing="2">用户与权限 / 系统设置</text>
+    <text x="120" y="48" text-anchor="middle" font-size="12" fill="#E6ECF5">角色管理 · 操作审计</text>
+    <text x="120" y="64" text-anchor="middle" font-size="10" fill="#7A8699">中英文 · 主题 · 数据存储路径</text>
+  </g>
+  <g transform="translate(1200,540)">
+    <rect width="120" height="74" fill="#11151C" stroke="#7A8699" stroke-width="1.2" stroke-dasharray="4,3" rx="3"/>
+    <text x="60" y="40" text-anchor="middle" font-size="11" fill="#A6B0C2">协议工具</text>
+    <text x="60" y="60" text-anchor="middle" font-size="9" fill="#7A8699">独立 EXE</text>
+  </g>
+
+  <!-- Footer note -->
+  <text x="700" y="690" text-anchor="middle" font-size="11" fill="#7A8699" letter-spacing="2">总览 ↔ 详情 双向跳转 · 报警可一键定位到对应设备 · 顶部状态栏全程显示在线/报警/语言/班次</text>
+  <text x="700" y="710" text-anchor="middle" font-size="11" fill="#7A8699" letter-spacing="2">所有控制类页面均执行：在线? · 远程模式? · 参数范围? · 当前状态允许? 四级前置校验</text>
+</svg>

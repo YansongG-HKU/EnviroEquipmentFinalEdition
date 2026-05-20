@@ -12,6 +12,16 @@ It also supports a project JSON mode for sequential multi-device connect/read ch
 
 ## Team Documents
 
+项目级文档体系（建议从这里开始，中文）：
+
+```text
+docs\README.md                  文档索引
+docs\PROJECT_OVERVIEW.md        项目说明（定位/背景/目标/范围）
+docs\DEVELOPMENT_STATUS.md      开发情况（已实现/技术栈/测试/怎么跑）
+docs\PROJECT_PROGRESS.md        项目进展说明（里程碑/Issue 看板/路线）
+docs\TECHNICAL_SOLUTION.md      技术方案（架构/通信/模块/测试/部署）
+```
+
 Start here for the upgrade/refactor technical blueprint:
 
 ```text
