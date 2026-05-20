@@ -8,8 +8,13 @@ public sealed record Shift(string Code, string Name, DateOnly Date)
     public static Shift ForLocalNow(DateTimeOffset? now = null)
     {
         var moment = now ?? DateTimeOffset.Now;
-        var hour = moment.LocalDateTime.Hour;
-        var date = DateOnly.FromDateTime(moment.LocalDateTime);
+        // Use the DateTimeOffset's own wallclock — when a caller passes a value with
+        // an explicit offset, they mean "treat this as the local time at that offset",
+        // not "convert to the CI runner's local zone first". The default path is also
+        // correct: DateTimeOffset.Now returns the machine wallclock paired with its
+        // local offset, so .Hour is the local hour either way.
+        var hour = moment.Hour;
+        var date = DateOnly.FromDateTime(moment.DateTime);
         return hour switch
         {
             >= 6 and < 14 => new Shift("DAY-A", "白班 A", date),
