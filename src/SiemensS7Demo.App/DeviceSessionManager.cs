@@ -46,6 +46,12 @@ public sealed class DeviceSessionManager : IDeviceSessionManager, IAsyncDisposab
     public IObservable<Device> Devices =>
         _subject.Where(d => d.Id.Value != "__sentinel__");
 
+    public IReadOnlyList<Device> CurrentSnapshots() =>
+        _sessions.Values
+            .Select(s => s.LatestSnapshot)
+            .Where(d => d.Id.Value != "__sentinel__")
+            .ToList();
+
     public Task ConnectAllAsync(CancellationToken ct)
     {
         lock (_connectLock)
@@ -102,6 +108,10 @@ public sealed class DeviceSessionManager : IDeviceSessionManager, IAsyncDisposab
         private readonly ILogger _logger;
         private readonly SiemensS7Client _client;
         private readonly Device _state;
+
+        // Public read-only snapshot for IDeviceSessionManager.CurrentSnapshots() — same instance
+        // the polling loop mutates. Consumers that need a frozen value should copy what they read.
+        public Device LatestSnapshot => _state;
         private readonly TagDefinition _pvTag;
         private readonly TagDefinition _svTag;
         private readonly DeviceSeed? _seed;
