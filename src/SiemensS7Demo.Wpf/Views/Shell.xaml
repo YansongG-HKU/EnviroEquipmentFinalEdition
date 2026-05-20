@@ -2,7 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:SiemensS7Demo.Wpf.ViewModels"
+        xmlns:vmalarms="clr-namespace:SiemensS7Demo.Wpf.ViewModels.Alarms"
         xmlns:views="clr-namespace:SiemensS7Demo.Wpf.Views"
+        xmlns:valarms="clr-namespace:SiemensS7Demo.Wpf.Views.Alarms"
         Title="温箱控制系统"
         Width="1600" Height="920"
         MinWidth="1280" MinHeight="800"
@@ -15,6 +17,12 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SingleDeviceViewModel}">
             <views:SingleDeviceView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vmalarms:CurrentAlarmsViewModel}">
+            <valarms:CurrentAlarmsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vmalarms:HistoryAlarmsViewModel}">
+            <valarms:HistoryAlarmsView />
         </DataTemplate>
     </Window.Resources>
     <Grid>

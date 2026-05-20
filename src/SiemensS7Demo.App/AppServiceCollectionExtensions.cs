@@ -1,4 +1,6 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
+using SiemensS7Demo.App.Alarms;
 using SiemensS7Demo.Domain;
 
 namespace SiemensS7Demo.App;
@@ -10,6 +12,13 @@ public static class AppServiceCollectionExtensions
         services.AddSingleton<IRbacContext, AdminRbacContext>();
         services.AddSingleton(sp => BuildDefaultProjectConfig());
         services.AddSingleton<IDeviceSessionManager, DeviceSessionManager>();
+        services.AddSingleton<IAlarmRepository, InMemoryAlarmRepository>();
+        services.AddSingleton(sp => new AlarmServiceOptions
+        {
+            DebounceWindow = TimeSpan.FromSeconds(5),
+            Rules = AlarmRulesCatalog.Default,
+        });
+        services.AddSingleton<IAlarmService, AlarmService>();
         return services;
     }
 
