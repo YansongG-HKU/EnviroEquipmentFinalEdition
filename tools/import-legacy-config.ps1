@@ -133,6 +133,7 @@ function Convert-Address {
     if ($Protocol -eq 'modbus') {
         switch ($DataType) {
             'Bool' { return "C$address" }
+            'Real' { return "HRF$address" }
             default { return "HR$address" }
         }
     }
@@ -148,7 +149,7 @@ function Read-LegacyTags {
         return @()
     }
 
-    $lines = Get-Content -Path $Path
+    $lines = Get-Content -Path $Path -Encoding UTF8
     $group = ''
     $blocks = New-Object System.Collections.Generic.List[object]
     $current = New-Object System.Collections.Generic.List[string]
@@ -240,7 +241,7 @@ function Read-LegacyTags {
     return $tags.ToArray()
 }
 
-[xml]$equipmentXml = Get-Content -Path $equipmentConfig -Raw
+[xml]$equipmentXml = Get-Content -Path $equipmentConfig -Raw -Encoding UTF8
 $devices = New-Object System.Collections.Generic.List[object]
 $enabledS7Assigned = $false
 $deviceIndex = 0
