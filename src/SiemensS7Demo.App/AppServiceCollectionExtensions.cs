@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SiemensS7Demo.App.Auth;
+using SiemensS7Demo.App.Mqtt;
 using SiemensS7Demo.Domain;
 using SiemensS7Demo.Domain.Users;
 
@@ -32,9 +35,18 @@ public static class AppServiceCollectionExtensions
     public static IServiceCollection AddPkg4Auth(this IServiceCollection services, IConfiguration config)
     {
         services.AddSingleton<PasswordHasher>();
+        // Register a default IProtectedStore so seeded passwords supplied via PasswordCipher
+        // can be decrypted at seed time. Windows hosts use DPAPI by default; non-Windows
+        // hosts fall back to the in-memory store (which provides NO real protection — but
+        // the seed loader also prefers env-var or plaintext password if those are present).
+        services.AddSingleton<IProtectedStore>(_ =>
+            OperatingSystem.IsWindows()
+                ? (IProtectedStore)new DpapiProtectedStore()
+                : new InMemoryProtectedStore());
         services.AddSingleton<IUserRepository>(sp =>
         {
             var hasher = sp.GetRequiredService<PasswordHasher>();
+            var protect = sp.GetRequiredService<IProtectedStore>();
             var seedSection = config.GetSection("Users");
             var entries = seedSection.Get<List<UserSeedEntry>>() ?? new List<UserSeedEntry>();
             var users = entries
@@ -44,11 +56,89 @@ public static class AppServiceCollectionExtensions
                     Name: string.IsNullOrEmpty(e.Name) ? e.Code : e.Name,
                     Role: e.Role,
                     Code: e.Code,
-                    PasswordHash: hasher.Hash(e.Password ?? string.Empty)));
+                    PasswordHash: hasher.Hash(ResolveSeedPassword(e, protect))));
             return new InMemoryUserRepository(users);
         });
         services.AddSingleton<IAuthService, AuthService>();
         return services;
+    }
+
+    /// <summary>
+    /// Resolves the plaintext password for a seeded user, in priority order:
+    ///   1. <c>SEED_PASSWORD_{CODE}</c> environment variable (CODE uppercased, '-' -> '_').
+    ///      Recommended for CI and production — keeps secrets out of <c>appsettings.json</c>.
+    ///   2. <see cref="UserSeedEntry.PasswordCipher"/> — DPAPI/base64 ciphertext, decrypted
+    ///      via <see cref="IProtectedStore"/>. Suitable for production hosts where DPAPI
+    ///      can scope to the service account.
+    ///   3. <see cref="UserSeedEntry.Password"/> — plaintext fallback. Kept for the
+    ///      headless smoke and unit tests; production configs MUST leave it empty.
+    ///   4. Empty string — final fallback. The user record will exist but no valid
+    ///      sign-in is possible until an admin provisions one of the above.
+    ///
+    /// Note: the resolved plaintext is hashed by Argon2id immediately by the caller and
+    /// then discarded; the only durable state in memory is the hash.
+    /// </summary>
+    private static string ResolveSeedPassword(UserSeedEntry entry, IProtectedStore protect)
+    {
+        var envKey = "SEED_PASSWORD_" + entry.Code.ToUpperInvariant().Replace('-', '_');
+        var envVal = Environment.GetEnvironmentVariable(envKey);
+        if (!string.IsNullOrEmpty(envVal)) return envVal;
+
+        if (!string.IsNullOrEmpty(entry.PasswordCipher))
+        {
+            try { return protect.Unprotect(entry.PasswordCipher); }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                // Fall through to plaintext / empty. We deliberately do NOT log the cipher —
+                // an admin will notice the missing user on sign-in.
+            }
+        }
+
+        return entry.Password ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Wires the Pkg 4 MQTT publisher:
+    ///   - <see cref="MqttPublisherOptions"/> bound from <c>Mqtt:</c> in configuration.
+    ///   - Password resolution order: <c>MQTT_PASSWORD</c> env var first; if missing, the
+    ///     <see cref="MqttPublisherOptions.PasswordCipher"/> field is decrypted via the
+    ///     registered <see cref="IProtectedStore"/>; the <c>Password</c> field in
+    ///     appsettings.json is a final fallback retained only for the headless smoke.
+    ///   - <see cref="IMqttPublisher"/> registered as a singleton (one broker session per host).
+    /// </summary>
+    public static IServiceCollection AddPkg4Mqtt(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddSingleton(sp =>
+        {
+            var opts = new MqttPublisherOptions();
+            config.GetSection("Mqtt").Bind(opts);
+            var protect = sp.GetService<IProtectedStore>();
+            opts.Password = ResolveMqttPassword(opts, protect);
+            return opts;
+        });
+        services.AddSingleton<IMqttPublisher>(sp =>
+        {
+            var opts = sp.GetRequiredService<MqttPublisherOptions>();
+            var logger = sp.GetService<ILogger<MqttPublisher>>();
+            return new MqttPublisher(opts, logger);
+        });
+        return services;
+    }
+
+    private static string? ResolveMqttPassword(MqttPublisherOptions opts, IProtectedStore? protect)
+    {
+        var env = Environment.GetEnvironmentVariable("MQTT_PASSWORD");
+        if (!string.IsNullOrEmpty(env)) return env;
+        if (!string.IsNullOrEmpty(opts.PasswordCipher) && protect is not null)
+        {
+            try { return protect.Unprotect(opts.PasswordCipher); }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                // Same policy as for users: silent fallback to plaintext / empty,
+                // never log the cipher.
+            }
+        }
+        return string.IsNullOrEmpty(opts.Password) ? null : opts.Password;
     }
 
     private static DeviceProvisioning Provision(

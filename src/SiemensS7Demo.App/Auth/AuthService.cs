@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SiemensS7Demo.App.Logging;
 using SiemensS7Demo.Domain.Users;
 
 namespace SiemensS7Demo.App.Auth;
@@ -59,6 +60,12 @@ public sealed class AuthService : IAuthService
         _failures.TryRemove(code, out _);
         Current = user;
         CurrentShift = shift;
+        // Plaintext-leak guard: ensure neither the password we received nor the user's
+        // PasswordHash sneaks into the log args. The first arg deliberately passes the
+        // raw code (which is a public identifier, not a secret); the second arg passes
+        // the role. If a future change adds e.g. `user.PasswordHash`, the Assert throws
+        // here at the call site instead of leaking to stdout / file sinks.
+        LogScrubber.Assert(("Code", code), ("Role", user.Role));
         _log.LogInformation("Sign-in succeeded: {Code} role={Role}.", code, user.Role);
         CurrentChanged?.Invoke(this, EventArgs.Empty);
         return AuthResult.Ok(user);
