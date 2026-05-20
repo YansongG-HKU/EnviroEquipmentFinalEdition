@@ -12,15 +12,40 @@ if (-not (Test-Path -LiteralPath $CssPath)) {
 
 $content = Get-Content -LiteralPath $CssPath -Raw
 
-# Match the :root { ... } block only (skip :root.theme-night and tweak rules in pass 1)
-$match = [regex]::Match($content, ":root\s*\{(?<body>[^}]*)\}", 'IgnoreCase')
-if (-not $match.Success) {
+$varRe = '(?m)^\s*--(?<name>[a-z0-9\-]+)\s*:\s*(?<value>[^;]+);'
+
+# The DARK theme is the target. styles.css declares a light base in the bare ":root {...}"
+# block and a dark override set in ":root.theme-night {...}". The night block only redefines
+# a subset of tokens (surfaces, lines, text, cyan/run accents, guide), so the effective dark
+# palette = light base WITH the night overrides applied on top. We build an ordered map from
+# the base block, then overwrite entries from the night block. Re-running is idempotent.
+
+# Base :root block — the bare selector, NOT :root.something. Require the char before the
+# brace (after optional whitespace) to be the selector colon-name, i.e. ":root {" exactly.
+$baseMatch = [regex]::Match($content, '(?m):root\s*\{(?<body>[^}]*)\}')
+if (-not $baseMatch.Success) {
     throw "No :root block found in $CssPath"
 }
+# Guard: ensure we grabbed the bare :root, not :root.theme-night (regex \s* would not match '.')
+$nightMatch = [regex]::Match($content, '(?m):root\.theme-night\s*\{(?<body>[^}]*)\}')
+if (-not $nightMatch.Success) {
+    throw "No :root.theme-night (dark) block found in $CssPath"
+}
 
-$body = $match.Groups['body'].Value
-$varRe = '(?m)^\s*--(?<name>[a-z0-9\-]+)\s*:\s*(?<value>[^;]+);'
-$matches = [regex]::Matches($body, $varRe)
+# Ordered name->value map preserving first-seen order from the base block.
+$order = New-Object System.Collections.Generic.List[string]
+$map = @{}
+foreach ($m in [regex]::Matches($baseMatch.Groups['body'].Value, $varRe)) {
+    $n = $m.Groups['name'].Value
+    if (-not $map.ContainsKey($n)) { $order.Add($n) }
+    $map[$n] = $m.Groups['value'].Value.Trim()
+}
+# Apply dark overrides (new names append after the base ones).
+foreach ($m in [regex]::Matches($nightMatch.Groups['body'].Value, $varRe)) {
+    $n = $m.Groups['name'].Value
+    if (-not $map.ContainsKey($n)) { $order.Add($n) }
+    $map[$n] = $m.Groups['value'].Value.Trim()
+}
 
 # CSS custom property name -> XAML resource key
 function ConvertTo-Key([string]$n) {
@@ -61,9 +86,8 @@ $brushLines = New-Object System.Collections.Generic.List[string]
 $thicknessLines = New-Object System.Collections.Generic.List[string]
 $fontLines = New-Object System.Collections.Generic.List[string]
 
-foreach ($m in $matches) {
-    $name = $m.Groups['name'].Value
-    $value = $m.Groups['value'].Value.Trim()
+foreach ($name in $order) {
+    $value = $map[$name]
     $key = ConvertTo-Key $name
 
     if ($name -like 'font-*') {
@@ -87,7 +111,7 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine('<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"')
 [void]$sb.AppendLine('                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"')
 [void]$sb.AppendLine('                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">')
-[void]$sb.AppendLine('    <!-- Generated from styles.css via tools/CssToXaml.ps1. Do not hand-edit. -->')
+[void]$sb.AppendLine('    <!-- Generated from styles.css (DARK theme: :root + :root.theme-night) via tools/CssToXaml.ps1. Do not hand-edit. -->')
 foreach ($l in $brushLines)    { [void]$sb.AppendLine($l) }
 foreach ($l in $fontLines)     { [void]$sb.AppendLine($l) }
 foreach ($l in $thicknessLines){ [void]$sb.AppendLine($l) }

@@ -1,30 +1,30 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=System.Runtime">
-    <!-- Generated from styles.css via tools/CssToXaml.ps1. Do not hand-edit. -->
-    <SolidColorBrush x:Key="BrushBg0" Color="#EEF2F7" />
-    <SolidColorBrush x:Key="BrushBg1" Color="#F6F8FB" />
-    <SolidColorBrush x:Key="BrushBg2" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="BrushBg3" Color="#F2F5FA" />
-    <SolidColorBrush x:Key="BrushBg4" Color="#E6ECF2" />
-    <SolidColorBrush x:Key="BrushBg5" Color="#D5DEE8" />
-    <SolidColorBrush x:Key="BrushLine1" Color="#E2E8F0" />
-    <SolidColorBrush x:Key="BrushLine2" Color="#CBD5E1" />
-    <SolidColorBrush x:Key="BrushLine3" Color="#94A3B8" />
-    <SolidColorBrush x:Key="BrushTxt0" Color="#0F172A" />
-    <SolidColorBrush x:Key="BrushTxt1" Color="#1E293B" />
-    <SolidColorBrush x:Key="BrushTxt2" Color="#475569" />
+    <!-- Generated from styles.css (DARK theme: :root + :root.theme-night) via tools/CssToXaml.ps1. Do not hand-edit. -->
+    <SolidColorBrush x:Key="BrushBg0" Color="#07090D" />
+    <SolidColorBrush x:Key="BrushBg1" Color="#0B0E13" />
+    <SolidColorBrush x:Key="BrushBg2" Color="#11151C" />
+    <SolidColorBrush x:Key="BrushBg3" Color="#161B24" />
+    <SolidColorBrush x:Key="BrushBg4" Color="#1C222C" />
+    <SolidColorBrush x:Key="BrushBg5" Color="#242B36" />
+    <SolidColorBrush x:Key="BrushLine1" Color="#1E2430" />
+    <SolidColorBrush x:Key="BrushLine2" Color="#2A3240" />
+    <SolidColorBrush x:Key="BrushLine3" Color="#3A4458" />
+    <SolidColorBrush x:Key="BrushTxt0" Color="#E6ECF5" />
+    <SolidColorBrush x:Key="BrushTxt1" Color="#B8C3D4" />
+    <SolidColorBrush x:Key="BrushTxt2" Color="#94A3B8" />
     <SolidColorBrush x:Key="BrushTxt3" Color="#64748B" />
-    <SolidColorBrush x:Key="BrushTxt4" Color="#94A3B8" />
+    <SolidColorBrush x:Key="BrushTxt4" Color="#475569" />
     <SolidColorBrush x:Key="BrushSteel" Color="#3B6FA0" />
     <SolidColorBrush x:Key="BrushSteelDim" Color="#BDD0E2" />
-    <SolidColorBrush x:Key="BrushCyan" Color="#0E7CB5" />
-    <SolidColorBrush x:Key="BrushCyanDim" Color="#BDD8E6" />
-    <SolidColorBrush x:Key="BrushCyanBg" Color="#140E7CB5" />
+    <SolidColorBrush x:Key="BrushCyan" Color="#3FBDD0" />
+    <SolidColorBrush x:Key="BrushCyanDim" Color="#1F6E7A" />
+    <SolidColorBrush x:Key="BrushCyanBg" Color="#1A3FBDD0" />
     <SolidColorBrush x:Key="BrushOk" Color="#16A34A" />
     <SolidColorBrush x:Key="BrushOkBg" Color="#1A16A34A" />
-    <SolidColorBrush x:Key="BrushRun" Color="#0E7CB5" />
-    <SolidColorBrush x:Key="BrushRunBg" Color="#1A0E7CB5" />
+    <SolidColorBrush x:Key="BrushRun" Color="#3FBDD0" />
+    <SolidColorBrush x:Key="BrushRunBg" Color="#1F3FBDD0" />
     <SolidColorBrush x:Key="BrushSched" Color="#2563EB" />
     <SolidColorBrush x:Key="BrushSchedBg" Color="#1A2563EB" />
     <SolidColorBrush x:Key="BrushPause" Color="#D97706" />
@@ -37,8 +37,8 @@
     <SolidColorBrush x:Key="BrushOffline" Color="#94A3B8" />
     <SolidColorBrush x:Key="BrushOfflineBg" Color="#2494A3B8" />
     <SolidColorBrush x:Key="BrushGuide" Color="#2563EB" />
-    <SolidColorBrush x:Key="BrushGuideBg" Color="#EFF4FF" />
-    <SolidColorBrush x:Key="BrushGuideBorder" Color="#BFD3FB" />
+    <SolidColorBrush x:Key="BrushGuideBg" Color="#1A2563EB" />
+    <SolidColorBrush x:Key="BrushGuideBorder" Color="#1E3A8A" />
     <SolidColorBrush x:Key="BrushSeriesTemp" Color="#DC2626" />
     <SolidColorBrush x:Key="BrushSeriesHumid" Color="#0E7CB5" />
     <SolidColorBrush x:Key="BrushSeriesPress" Color="#7C3AED" />

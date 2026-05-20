@@ -35,18 +35,24 @@ public class TokensTests
         "BrushSeriesTemp", "BrushSeriesHumid", "BrushSeriesPress", "BrushSeriesSet",
     };
 
+    // The DARK theme is the locked target. styles.css declares a light base ":root" and a dark
+    // override ":root.theme-night"; CssToXaml.ps1 merges them (night wins). These spot-checks
+    // assert the *effective dark* hex: surfaces/text/cyan/run come from the night block, while
+    // status (ok/warn/alarm/offline) and series colors are inherited unchanged from the base.
     private static readonly (string Key, string Hex)[] SpotCheckBrushes =
     {
-        ("BrushBg1", "#F6F8FB"),
-        ("BrushTxt0", "#0F172A"),
-        ("BrushCyan", "#0E7CB5"),
-        ("BrushRun", "#0E7CB5"),
-        ("BrushAlarm", "#DC2626"),
-        ("BrushWarn", "#D97706"),
-        ("BrushOk", "#16A34A"),
-        ("BrushOffline", "#94A3B8"),
-        ("BrushSeriesTemp", "#DC2626"),
-        ("BrushSeriesHumid", "#0E7CB5"),
+        ("BrushBg0", "#07090D"),   // night override
+        ("BrushBg1", "#0B0E13"),   // night override
+        ("BrushBg2", "#11151C"),   // night override
+        ("BrushTxt0", "#E6ECF5"),  // night override
+        ("BrushCyan", "#3FBDD0"),  // night override
+        ("BrushRun", "#3FBDD0"),   // night override
+        ("BrushAlarm", "#DC2626"), // inherited from base
+        ("BrushWarn", "#D97706"),  // inherited from base
+        ("BrushOk", "#16A34A"),    // inherited from base
+        ("BrushOffline", "#94A3B8"),    // inherited from base
+        ("BrushSeriesTemp", "#DC2626"), // inherited from base
+        ("BrushSeriesHumid", "#0E7CB5"),// inherited from base
     };
 
     private static ResourceDictionary LoadTokens()
