@@ -12,7 +12,16 @@ public static class AppServiceCollectionExtensions
 {
     public static IServiceCollection AddSiemensS7DemoApp(this IServiceCollection services)
     {
-        services.AddSingleton<IRbacContext, AdminRbacContext>();
+        // RBAC is wired to whatever IAuthService is registered (Pkg 4's AddPkg4Auth). If no
+        // IAuthService is present (e.g. legacy headless tests), the resolver falls back to
+        // AdminRbacContext so existing Pkg 1/2 callsites keep working.
+        services.AddSingleton<IRbacContext>(sp =>
+        {
+            var auth = sp.GetService<IAuthService>();
+            return auth is null
+                ? new AdminRbacContext()
+                : new AuthBackedRbacContext(auth);
+        });
         services.AddSingleton(sp => BuildDefaultProjectConfig());
         services.AddSingleton<IDeviceSessionManager, DeviceSessionManager>();
         return services;

@@ -22,6 +22,7 @@ public class OverviewViewModelTests
         public Task ConnectAllAsync(CancellationToken ct) => Task.CompletedTask;
         public Task<DeviceWriteResult> WriteSetpointAsync(DeviceId id, Setpoints sp, CancellationToken ct)
             => Task.FromResult(DeviceWriteResult.Success());
+        public IReadOnlyList<Device> CurrentSnapshots() => Array.Empty<Device>();
         public void Push(Device d) => _subject.OnNext(d);
     }
 

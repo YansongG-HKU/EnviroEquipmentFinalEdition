@@ -31,6 +31,9 @@ public class SingleDeviceViewModelTests
             return Task.FromResult(NextResult);
         }
 
+        public System.Collections.Generic.IReadOnlyList<Device> CurrentSnapshots()
+            => System.Array.Empty<Device>();
+
         public void Push(Device d) => _subject.OnNext(d);
     }
 

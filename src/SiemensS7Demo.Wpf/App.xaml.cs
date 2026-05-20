@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using SiemensS7Demo.App;
+using SiemensS7Demo.App.Auth;
 using SiemensS7Demo.Wpf.Smoke;
 using SiemensS7Demo.Wpf.Views;
 using SiemensS7Demo.Wpf.ViewModels;
@@ -68,6 +69,13 @@ public partial class App : Application
         single.Subscribe();
         shellVm.BindOverview(overview);
         shellVm.StartClock();
+        // Bind RBAC: subscribes ShellViewModel to IAuthService.CurrentChanged so nav-rail
+        // visibility + role-gated command CanExecute state track the signed-in user. Without
+        // this, every signed-in session sees Admin power because IRbacContext otherwise has no
+        // way to learn that the active sign-in changed.
+        var auth = _host.Services.GetRequiredService<IAuthService>();
+        var rbac = _host.Services.GetRequiredService<IRbacContext>();
+        shellVm.WireRbac(auth, rbac);
         overview.CardActivated += id => shellVm.OpenDevice(id);
 
         var shell = _host.Services.GetRequiredService<Shell>();

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SiemensS7Demo.App;
 using SiemensS7Demo.App.Auth;
 using SiemensS7Demo.Domain.Users;
 
@@ -14,6 +16,8 @@ public sealed partial class ShellViewModel : ObservableObject
     private readonly OverviewViewModel _overview;
     private readonly SingleDeviceViewModel _single;
     private DispatcherTimer? _clockTimer;
+    private IAuthService? _wiredAuth;
+    private IRbacContext? _wiredRbac;
 
     public ShellViewModel(OverviewViewModel overview, SingleDeviceViewModel single)
     {
@@ -89,6 +93,9 @@ public sealed partial class ShellViewModel : ObservableObject
     /// Pkg 4 calls this from App.xaml.cs whenever the active sign-in changes — entries with a
     /// MinimumRole the user does not meet collapse, the rest stay visible. Returns the list of
     /// items whose visibility flipped, for observability/logging.
+    ///
+    /// Also pumps WPF's CommandManager (and any IRelayCommand whose CanExecute depends on the
+    /// signed-in role) so role-gated buttons enable/disable in lockstep with the role change.
     /// </summary>
     public IReadOnlyList<NavItem> ApplyRbac(User? user)
     {
@@ -103,8 +110,42 @@ public sealed partial class ShellViewModel : ObservableObject
             }
         }
         OnPropertyChanged(nameof(VisibleNavItems));
+
+        // Notify role-gated IRelayCommand consumers so WPF binding refreshes button state.
+        // CommandManager only ticks on WPF input events / focus changes; without the explicit
+        // invalidation, [RequiresRole]-gated buttons stay stale until the user moves the mouse.
+        _single.RunCommand.NotifyCanExecuteChanged();
+        _single.PauseCommand.NotifyCanExecuteChanged();
+        _single.StopCommand.NotifyCanExecuteChanged();
+        _single.ResetCommand.NotifyCanExecuteChanged();
+        _single.WriteSetpointCommand.NotifyCanExecuteChanged();
+        CommandManager.InvalidateRequerySuggested();
+
         return flipped;
     }
+
+    /// <summary>
+    /// Wire this shell to the live <see cref="IAuthService"/> + <see cref="IRbacContext"/> so the
+    /// nav-rail visibility and command CanExecute state track the signed-in user. Idempotent:
+    /// re-wiring detaches the previous subscription before attaching the new one. Called once by
+    /// App.xaml.cs after sign-in.
+    /// </summary>
+    public void WireRbac(IAuthService auth, IRbacContext rbac)
+    {
+        if (_wiredAuth is not null)
+        {
+            _wiredAuth.CurrentChanged -= OnAuthCurrentChanged;
+        }
+        _wiredAuth = auth;
+        _wiredRbac = rbac;
+        _wiredAuth.CurrentChanged += OnAuthCurrentChanged;
+        // Apply once for the current sign-in state so visibility reflects today's reality even
+        // before the next CurrentChanged event.
+        ApplyRbac(auth.Current);
+    }
+
+    private void OnAuthCurrentChanged(object? sender, EventArgs e)
+        => ApplyRbac(_wiredAuth?.Current);
 
     public IEnumerable<NavItem> VisibleNavItems => NavItems.Where(n => n.IsVisible);
 
