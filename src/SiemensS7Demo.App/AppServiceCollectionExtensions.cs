@@ -1,5 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SiemensS7Demo.App.Auth;
 using SiemensS7Demo.Domain;
+using SiemensS7Demo.Domain.Users;
 
 namespace SiemensS7Demo.App;
 
@@ -7,9 +12,51 @@ public static class AppServiceCollectionExtensions
 {
     public static IServiceCollection AddSiemensS7DemoApp(this IServiceCollection services)
     {
-        services.AddSingleton<IRbacContext, AdminRbacContext>();
+        // RBAC is wired to whatever IAuthService is registered (Pkg 4's AddPkg4Auth). If no
+        // IAuthService is present (e.g. legacy headless tests), the resolver falls back to
+        // AdminRbacContext so existing Pkg 1/2 callsites keep working.
+        services.AddSingleton<IRbacContext>(sp =>
+        {
+            var auth = sp.GetService<IAuthService>();
+            return auth is null
+                ? new AdminRbacContext()
+                : new AuthBackedRbacContext(auth);
+        });
         services.AddSingleton(sp => BuildDefaultProjectConfig());
         services.AddSingleton<IDeviceSessionManager, DeviceSessionManager>();
+        return services;
+    }
+
+    /// <summary>
+    /// Wires the Pkg 4 authentication stack:
+    ///   - <see cref="PasswordHasher"/> (Argon2id)
+    ///   - <see cref="InMemoryUserRepository"/> seeded from <c>Users:</c> in configuration
+    ///   - <see cref="AuthService"/> as the singleton <see cref="IAuthService"/>
+    ///
+    /// Plaintext passwords from <c>appsettings.json</c> are hashed once at startup and discarded;
+    /// only the Argon2id-encoded hash survives in memory. When Pkg 3 M3.1 lands, swap
+    /// <see cref="InMemoryUserRepository"/> for a SQLite-backed implementation — <see cref="AuthService"/>
+    /// is unchanged.
+    /// </summary>
+    public static IServiceCollection AddPkg4Auth(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddSingleton<PasswordHasher>();
+        services.AddSingleton<IUserRepository>(sp =>
+        {
+            var hasher = sp.GetRequiredService<PasswordHasher>();
+            var seedSection = config.GetSection("Users");
+            var entries = seedSection.Get<List<UserSeedEntry>>() ?? new List<UserSeedEntry>();
+            var users = entries
+                .Where(e => !string.IsNullOrWhiteSpace(e.Code))
+                .Select(e => new User(
+                    Id: $"u-{e.Code}",
+                    Name: string.IsNullOrEmpty(e.Name) ? e.Code : e.Name,
+                    Role: e.Role,
+                    Code: e.Code,
+                    PasswordHash: hasher.Hash(e.Password ?? string.Empty)));
+            return new InMemoryUserRepository(users);
+        });
+        services.AddSingleton<IAuthService, AuthService>();
         return services;
     }
 

@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Input;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SiemensS7Demo.App;
+using SiemensS7Demo.App.Auth;
+using SiemensS7Demo.Domain.Users;
 
 namespace SiemensS7Demo.Wpf.ViewModels;
 
@@ -11,6 +16,8 @@ public sealed partial class ShellViewModel : ObservableObject
     private readonly OverviewViewModel _overview;
     private readonly SingleDeviceViewModel _single;
     private DispatcherTimer? _clockTimer;
+    private IAuthService? _wiredAuth;
+    private IRbacContext? _wiredRbac;
 
     public ShellViewModel(OverviewViewModel overview, SingleDeviceViewModel single)
     {
@@ -68,18 +75,79 @@ public sealed partial class ShellViewModel : ObservableObject
     /// </summary>
     public IReadOnlyList<NavItem> NavItems { get; } = new List<NavItem>
     {
-        new("overview", "总览",       "grid",    IsEnabled: true),
-        new("single",   "当前试验",   "monitor", IsEnabled: true),
-        new("program",  "程序编辑",   "edit",    IsEnabled: false),
-        new("history",  "历史试验",   "archive", IsEnabled: false),
-        new("alarm",    "报警中心",   "alarm",   IsEnabled: false),
-        new("lims",     "LIMS / 黑灯", "link",   IsEnabled: false),
-        new("layout",   "监控布局",   "layout",  IsEnabled: false),
-        new("device",   "设备接入",   "plug",    IsEnabled: false),
-        new("maint",    "设备维护",   "tool",    IsEnabled: false),
-        new("users",    "用户与权限", "users",   IsEnabled: false),
-        new("settings", "系统设置",   "cog",     IsEnabled: false),
+        new("overview", "总览",       "grid",    isEnabled: true),
+        new("single",   "当前试验",   "monitor", isEnabled: true),
+        new("program",  "程序编辑",   "edit",    isEnabled: false, minimumRole: Role.Engineer),
+        new("history",  "历史试验",   "archive", isEnabled: false),
+        new("alarm",    "报警中心",   "alarm",   isEnabled: false),
+        new("lims",     "LIMS / 黑灯", "link",   isEnabled: false),
+        new("layout",   "监控布局",   "layout",  isEnabled: false, minimumRole: Role.Engineer),
+        new("device",   "设备接入",   "plug",    isEnabled: false, minimumRole: Role.Engineer),
+        new("maint",    "设备维护",   "tool",    isEnabled: false, minimumRole: Role.Engineer),
+        new("users",    "用户与权限", "users",   isEnabled: false, minimumRole: Role.Admin),
+        new("settings", "系统设置",   "cog",     isEnabled: false, minimumRole: Role.Admin),
     };
+
+    /// <summary>
+    /// Set <see cref="NavItem.IsVisible"/> for every entry based on the signed-in user's role.
+    /// Pkg 4 calls this from App.xaml.cs whenever the active sign-in changes — entries with a
+    /// MinimumRole the user does not meet collapse, the rest stay visible. Returns the list of
+    /// items whose visibility flipped, for observability/logging.
+    ///
+    /// Also pumps WPF's CommandManager (and any IRelayCommand whose CanExecute depends on the
+    /// signed-in role) so role-gated buttons enable/disable in lockstep with the role change.
+    /// </summary>
+    public IReadOnlyList<NavItem> ApplyRbac(User? user)
+    {
+        var flipped = new List<NavItem>();
+        foreach (var item in NavItems)
+        {
+            var allowed = RbacGuard.IsAllowed(user, item.MinimumRole);
+            if (item.IsVisible != allowed)
+            {
+                item.IsVisible = allowed;
+                flipped.Add(item);
+            }
+        }
+        OnPropertyChanged(nameof(VisibleNavItems));
+
+        // Notify role-gated IRelayCommand consumers so WPF binding refreshes button state.
+        // CommandManager only ticks on WPF input events / focus changes; without the explicit
+        // invalidation, [RequiresRole]-gated buttons stay stale until the user moves the mouse.
+        _single.RunCommand.NotifyCanExecuteChanged();
+        _single.PauseCommand.NotifyCanExecuteChanged();
+        _single.StopCommand.NotifyCanExecuteChanged();
+        _single.ResetCommand.NotifyCanExecuteChanged();
+        _single.WriteSetpointCommand.NotifyCanExecuteChanged();
+        CommandManager.InvalidateRequerySuggested();
+
+        return flipped;
+    }
+
+    /// <summary>
+    /// Wire this shell to the live <see cref="IAuthService"/> + <see cref="IRbacContext"/> so the
+    /// nav-rail visibility and command CanExecute state track the signed-in user. Idempotent:
+    /// re-wiring detaches the previous subscription before attaching the new one. Called once by
+    /// App.xaml.cs after sign-in.
+    /// </summary>
+    public void WireRbac(IAuthService auth, IRbacContext rbac)
+    {
+        if (_wiredAuth is not null)
+        {
+            _wiredAuth.CurrentChanged -= OnAuthCurrentChanged;
+        }
+        _wiredAuth = auth;
+        _wiredRbac = rbac;
+        _wiredAuth.CurrentChanged += OnAuthCurrentChanged;
+        // Apply once for the current sign-in state so visibility reflects today's reality even
+        // before the next CurrentChanged event.
+        ApplyRbac(auth.Current);
+    }
+
+    private void OnAuthCurrentChanged(object? sender, EventArgs e)
+        => ApplyRbac(_wiredAuth?.Current);
+
+    public IEnumerable<NavItem> VisibleNavItems => NavItems.Where(n => n.IsVisible);
 
     /// <summary>
     /// Connect this shell to the live overview VM: surface its alarm count in the top bar.

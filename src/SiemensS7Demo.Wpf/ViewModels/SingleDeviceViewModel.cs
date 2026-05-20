@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SiemensS7Demo.App;
+using SiemensS7Demo.App.Auth;
 using SiemensS7Demo.Domain;
+using SiemensS7Demo.Domain.Users;
 
 namespace SiemensS7Demo.Wpf.ViewModels;
 
@@ -186,6 +188,7 @@ public sealed partial class SingleDeviceViewModel : ObservableObject, IDisposabl
     }
 
     [RelayCommand(CanExecute = nameof(CanWrite))]
+    [RequiresRole(Role.Engineer)]
     private async Task WriteSetpointAsync()
     {
         if (_sessionManager is null || SelectedDeviceId is null) return;
@@ -204,19 +207,23 @@ public sealed partial class SingleDeviceViewModel : ObservableObject, IDisposabl
         && _rbac.IsAtLeast(Role.Engineer);
 
     [RelayCommand(CanExecute = nameof(CanRun))]
+    [RequiresRole(Role.Operator)]
     private void Run() { /* command write goes to PLC in Pkg 3 program engine */ }
     private bool CanRun() => SelectedStatus is DeviceStatus.Idle or DeviceStatus.Paused && _rbac.IsAtLeast(Role.Operator);
 
     [RelayCommand(CanExecute = nameof(CanPause))]
+    [RequiresRole(Role.Operator)]
     private void Pause() { /* command write goes to PLC in Pkg 3 program engine */ }
     private bool CanPause() => SelectedStatus is DeviceStatus.Run && _rbac.IsAtLeast(Role.Operator);
 
     [RelayCommand(CanExecute = nameof(CanStop))]
+    [RequiresRole(Role.Engineer)]
     private void Stop() { /* command write goes to PLC in Pkg 3 program engine */ }
     private bool CanStop() => SelectedStatus is DeviceStatus.Run or DeviceStatus.Paused or DeviceStatus.Alarm
         && _rbac.IsAtLeast(Role.Engineer);
 
     [RelayCommand(CanExecute = nameof(CanReset))]
+    [RequiresRole(Role.Operator)]
     private void Reset() { /* alarm reset write — wired in Pkg 2 */ }
     private bool CanReset() => SelectedStatus is DeviceStatus.Alarm && _rbac.IsAtLeast(Role.Operator);
 

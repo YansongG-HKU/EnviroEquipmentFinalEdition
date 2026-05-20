@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using SiemensS7Demo.App;
 using SiemensS7Demo.Domain;
+using SiemensS7Demo.Domain.Users;
 using SiemensS7Demo.Wpf.ViewModels;
 using Xunit;
 
@@ -29,6 +30,9 @@ public class SingleDeviceViewModelTests
             LastWriteSp = sp;
             return Task.FromResult(NextResult);
         }
+
+        public System.Collections.Generic.IReadOnlyList<Device> CurrentSnapshots()
+            => System.Array.Empty<Device>();
 
         public void Push(Device d) => _subject.OnNext(d);
     }
