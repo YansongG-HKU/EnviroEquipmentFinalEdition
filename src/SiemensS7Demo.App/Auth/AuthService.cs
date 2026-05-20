@@ -84,6 +84,44 @@ public sealed class AuthService : IAuthService
         CurrentChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Verify a credential pair without mutating <see cref="Current"/>. Shares the lockout
+    /// dictionary and the timing-equalising dummy-hash branch with <see cref="SignInAsync"/>
+    /// so a failed verify is indistinguishable from a failed sign-in (both to attackers measuring
+    /// wall-clock cost and to the lockout window). LoginViewModel uses this in its password step
+    /// to avoid the previous probe-and-release pattern that transiently set Current and ran
+    /// Argon2 twice per login.
+    /// </summary>
+    public async Task<bool> VerifyPasswordAsync(string code, string password, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(code) || password is null) return false;
+        if (IsLockedOut(code))
+        {
+            _log.LogWarning("Verify blocked: {Code} locked out.", code);
+            return false;
+        }
+
+        var user = await _users.FindByCodeAsync(code, ct).ConfigureAwait(false);
+        if (user is null)
+        {
+            // Same dummy-hash verify as SignInAsync — see Fix 3 / DummyHash for rationale.
+            _hasher.Verify(password, DummyHash);
+            RecordFailure(code);
+            return false;
+        }
+
+        if (!_hasher.Verify(password, user.PasswordHash))
+        {
+            RecordFailure(code);
+            _log.LogInformation("Verify failed for {Code}.", code);
+            return false;
+        }
+
+        // Successful verify does NOT clear the lockout counter (that happens only on a real
+        // SignInAsync success) and does NOT touch Current / CurrentChanged.
+        return true;
+    }
+
     private bool IsLockedOut(string code)
     {
         if (!_failures.TryGetValue(code, out var bucket)) return false;

@@ -66,15 +66,16 @@ public sealed partial class LoginViewModel : ObservableObject
     public async Task SubmitPasswordAsync(CancellationToken ct)
     {
         if (SelectedCode is null) return;
-        // Probe-and-release: we sign in to validate the password against the hasher, then sign out
-        // so the persistent session only begins after the shift-confirm step in ConfirmShiftAsync.
-        var probe = await _auth.SignInAsync(SelectedCode, Password, SelectedShift ?? Shift.ForLocalNow(), ct);
-        if (!probe.Success)
+        // Use VerifyPasswordAsync (added in Pkg 4 review fix 4) so we validate the password
+        // without mutating IAuthService.Current. The previous probe-and-release pattern called
+        // SignInAsync + SignOut, which (a) ran Argon2id twice per login and (b) transiently set
+        // Current, causing the RBAC-bound nav rail to flash full-access state for a few ms.
+        var ok = await _auth.VerifyPasswordAsync(SelectedCode, Password, ct);
+        if (!ok)
         {
-            ErrorMessage = probe.ErrorMessage;
+            ErrorMessage = "Invalid credentials.";
             return;
         }
-        _auth.SignOut();
         ErrorMessage = null;
         Step = LoginStep.ConfirmShift;
     }
