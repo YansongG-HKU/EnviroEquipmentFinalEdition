@@ -12,6 +12,15 @@ public sealed class AuthService : IAuthService
     private static readonly TimeSpan LockoutWindow = TimeSpan.FromSeconds(30);
     private const int LockoutThreshold = 5;
 
+    /// <summary>
+    /// Constant Argon2id hash used as a dummy target when <see cref="FindByCodeAsync"/> returns
+    /// null. Verifying against this in the unknown-user branch equalizes the wall-clock cost of
+    /// the SignInAsync path with the known-user-wrong-password branch (~100ms Argon2id work),
+    /// closing the user-enumeration timing oracle. The dummy password "::dummy::" intentionally
+    /// cannot match any real account (real codes seed from configuration with their own salts).
+    /// </summary>
+    private static readonly string DummyHash = new PasswordHasher().Hash("::dummy::");
+
     private readonly IUserRepository _users;
     private readonly PasswordHasher _hasher;
     private readonly ILogger<AuthService> _log;
@@ -45,6 +54,10 @@ public sealed class AuthService : IAuthService
         var user = await _users.FindByCodeAsync(code, ct).ConfigureAwait(false);
         if (user is null)
         {
+            // Equalize timing with the known-user-wrong-password branch by running a real Argon2id
+            // verify against the static DummyHash. Without this, an attacker can distinguish valid
+            // vs invalid usernames by measuring response latency (~100ms hit vs ~0ms miss).
+            _hasher.Verify(password, DummyHash);
             RecordFailure(code);
             return AuthResult.Fail("Invalid credentials.");
         }
