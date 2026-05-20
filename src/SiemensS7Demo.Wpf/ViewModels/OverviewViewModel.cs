@@ -26,8 +26,23 @@ public sealed partial class OverviewViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<DeviceCardViewModel> Cards { get; } = new();
 
+    /// <summary>Raised when a card is activated (clicked) so the shell can route to the single view.</summary>
+    public event Action<string>? CardActivated;
+
+    [ObservableProperty]
+    private int _totalCount;
+
     [ObservableProperty]
     private int _onlineCount;
+
+    [ObservableProperty]
+    private int _runCount;
+
+    [ObservableProperty]
+    private int _pauseCount;
+
+    [ObservableProperty]
+    private int _schedCount;
 
     [ObservableProperty]
     private int _alarmCount;
@@ -86,7 +101,11 @@ public sealed partial class OverviewViewModel : ObservableObject, IDisposable
 
     private void Recompute()
     {
+        TotalCount = Cards.Count;
         OnlineCount = Cards.Count(c => c.Online);
+        RunCount = Cards.Count(c => c.Status == DeviceStatus.Run);
+        PauseCount = Cards.Count(c => c.Status == DeviceStatus.Paused);
+        SchedCount = Cards.Count(c => c.Status == DeviceStatus.Scheduled);
         AlarmCount = Cards.Count(c => c.Status == DeviceStatus.Alarm);
         OfflineCount = Cards.Count(c => c.Status == DeviceStatus.Offline);
         AnyAlarm = AlarmCount > 0;
@@ -94,6 +113,16 @@ public sealed partial class OverviewViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void Refresh() => Recompute();
+
+    /// <summary>Activate (open) a card. Bound to the card's click; the shell listens via CardActivated.</summary>
+    [RelayCommand]
+    private void Activate(string? deviceId)
+    {
+        if (!string.IsNullOrEmpty(deviceId))
+        {
+            CardActivated?.Invoke(deviceId);
+        }
+    }
 
     public void Dispose()
     {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,7 +51,16 @@ public sealed partial class SingleDeviceViewModel : ObservableObject, IDisposabl
     private double? _sv;
 
     [ObservableProperty]
+    private double? _humidity;
+
+    [ObservableProperty]
+    private double? _humiditySv;
+
+    [ObservableProperty]
     private string _bay = string.Empty;
+
+    [ObservableProperty]
+    private string? _programName;
 
     [ObservableProperty]
     private double _newSvInput;
@@ -63,6 +73,15 @@ public sealed partial class SingleDeviceViewModel : ObservableObject, IDisposabl
 
     [ObservableProperty]
     private string _segmentDisplay = "段 —/—";
+
+    [ObservableProperty]
+    private string _cycleDisplay = "循环 —/—";
+
+    [ObservableProperty]
+    private string _remainDisplay = "剩余 —";
+
+    [ObservableProperty]
+    private bool _hasHumidity;
 
     public void Subscribe()
     {
@@ -115,7 +134,55 @@ public sealed partial class SingleDeviceViewModel : ObservableObject, IDisposabl
         Bay = d.Bay;
         Pv = d.LastReading?.Pv;
         Sv = d.Setpoints.Temp;
+        Humidity = d.LastReading?.Humid;
+        HumiditySv = d.Setpoints.Humidity;
+        HasHumidity = Humidity is not null;
         SelectedStatus = d.Status;
+
+        var prog = d.Program;
+        ProgramName = prog.Name;
+        SegmentDisplay = prog.SegTotal > 0 ? $"段 {prog.Seg}/{prog.SegTotal}" : "段 —/—";
+        CycleDisplay = prog.CycleTotal > 0 ? $"循环 {prog.Cycle}/{prog.CycleTotal}" : "循环 —/—";
+        RemainDisplay = "剩余 " + DeviceCardViewModel.FormatRemain(prog.RemainSec);
+
+        if (Pv is double pv)
+        {
+            PushTrend(pv);
+        }
+    }
+
+    // ── Rolling PV trend for the single-device trend area (Polyline; OxyPlot is Pkg 3) ──
+    private readonly System.Collections.Generic.Queue<double> _trend = new(TrendCapacity);
+    public const int TrendCapacity = 60;
+    public const double SparkWidth = 760;
+    public const double SparkHeight = 220;
+
+    [ObservableProperty]
+    private System.Windows.Media.PointCollection _trendPoints = new();
+
+    public System.Collections.Generic.IReadOnlyList<double> TrendBuffer => _trend.ToArray();
+
+    private void PushTrend(double value)
+    {
+        if (_trend.Count >= TrendCapacity) _trend.Dequeue();
+        _trend.Enqueue(value);
+        var arr = _trend.ToArray();
+        var pts = new System.Windows.Media.PointCollection();
+        if (arr.Length >= 2)
+        {
+            var min = arr.Min();
+            var max = arr.Max();
+            var range = max - min;
+            if (range <= double.Epsilon) range = 1;
+            for (var i = 0; i < arr.Length; i++)
+            {
+                var x = (double)i / (arr.Length - 1) * SparkWidth;
+                var y = SparkHeight - (arr[i] - min) / range * (SparkHeight - 8) - 4;
+                pts.Add(new System.Windows.Point(System.Math.Round(x, 2), System.Math.Round(y, 2)));
+            }
+            pts.Freeze();
+        }
+        TrendPoints = pts;
     }
 
     [RelayCommand(CanExecute = nameof(CanWrite))]

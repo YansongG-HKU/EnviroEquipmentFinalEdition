@@ -99,4 +99,53 @@ public class OverviewViewModelTests
         await Task.Delay(50);
         vm.AnyAlarm.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task SummaryCounters_CoverAllDesignBuckets()
+    {
+        var fake = new FakeSessionManager();
+        var vm = new OverviewViewModel(fake);
+        vm.Subscribe();
+
+        fake.Push(Make("TH-01", DeviceStatus.Run));
+        fake.Push(Make("TH-02", DeviceStatus.Run));
+        fake.Push(Make("TH-03", DeviceStatus.Paused));
+        fake.Push(Make("TH-04", DeviceStatus.Scheduled));
+        fake.Push(Make("TH-05", DeviceStatus.Alarm));
+        fake.Push(Make("TH-06", DeviceStatus.Offline));
+        await Task.Delay(60);
+
+        vm.TotalCount.Should().Be(6);
+        vm.OnlineCount.Should().Be(5);   // all but the offline one
+        vm.RunCount.Should().Be(2);
+        vm.PauseCount.Should().Be(1);
+        vm.SchedCount.Should().Be(1);
+        vm.AlarmCount.Should().Be(1);
+        vm.OfflineCount.Should().Be(1);
+    }
+
+    [Fact]
+    public void ActivateCommand_RaisesCardActivatedWithDeviceId()
+    {
+        var vm = new OverviewViewModel(new FakeSessionManager());
+        string? activated = null;
+        vm.CardActivated += id => activated = id;
+
+        vm.ActivateCommand.Execute("TH-07");
+
+        activated.Should().Be("TH-07");
+    }
+
+    [Fact]
+    public void ActivateCommand_IgnoresNullOrEmptyId()
+    {
+        var vm = new OverviewViewModel(new FakeSessionManager());
+        var raised = false;
+        vm.CardActivated += _ => raised = true;
+
+        vm.ActivateCommand.Execute(null);
+        vm.ActivateCommand.Execute(string.Empty);
+
+        raised.Should().BeFalse();
+    }
 }

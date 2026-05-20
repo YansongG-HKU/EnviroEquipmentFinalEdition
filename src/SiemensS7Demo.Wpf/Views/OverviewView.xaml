@@ -6,40 +6,91 @@
     <UserControl.Resources>
         <conv:StatusToBrushConverter x:Key="StatusToBrush" />
         <conv:StatusToLabelConverter x:Key="StatusToLabel" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Summary strip -->
+        <!-- Summary strip — total / online / run / pause / sched / alarm / offline -->
         <Border Grid.Row="0" Background="{StaticResource BrushBg2}"
                 BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Margin="16,12">
-                <StackPanel Margin="0,0,28,0">
-                    <TextBlock Style="{StaticResource LabelText}" Text="在线" />
+            <StackPanel Orientation="Horizontal" Margin="18,12">
+                <StackPanel Margin="0,0,30,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="设备总数" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="28"
+                               Foreground="{StaticResource BrushTxt0}"
+                               Text="{Binding TotalCount, StringFormat={}{0:D2}}" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="已接入" />
+                </StackPanel>
+                <StackPanel Margin="0,0,30,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="在线" />
                     <TextBlock Style="{StaticResource MonoText}" FontSize="28"
                                Foreground="{StaticResource BrushOk}"
                                Text="{Binding OnlineCount, StringFormat={}{0:D2}}" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="通信正常" />
                 </StackPanel>
-                <StackPanel Margin="0,0,28,0">
-                    <TextBlock Style="{StaticResource LabelText}" Text="报警" />
+                <StackPanel Margin="0,0,30,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="运行中" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="28"
+                               Foreground="{StaticResource BrushRun}"
+                               Text="{Binding RunCount, StringFormat={}{0:D2}}" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="试验进行中" />
+                </StackPanel>
+                <StackPanel Margin="0,0,30,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="暂停" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="28"
+                               Foreground="{StaticResource BrushPause}"
+                               Text="{Binding PauseCount, StringFormat={}{0:D2}}" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="需手动继续" />
+                </StackPanel>
+                <StackPanel Margin="0,0,30,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="预约" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="28"
+                               Foreground="{StaticResource BrushSched}"
+                               Text="{Binding SchedCount, StringFormat={}{0:D2}}" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="到时启动" />
+                </StackPanel>
+                <StackPanel Margin="0,0,30,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="报警" />
                     <TextBlock Style="{StaticResource MonoText}" FontSize="28"
                                Foreground="{StaticResource BrushAlarm}"
                                Text="{Binding AlarmCount, StringFormat={}{0:D2}}" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="需立即处理" />
                 </StackPanel>
-                <StackPanel Margin="0,0,28,0">
-                    <TextBlock Style="{StaticResource LabelText}" Text="离线" />
+                <StackPanel>
+                    <TextBlock Style="{StaticResource CardLabel}" Text="离线" />
                     <TextBlock Style="{StaticResource MonoText}" FontSize="28"
                                Foreground="{StaticResource BrushOffline}"
                                Text="{Binding OfflineCount, StringFormat={}{0:D2}}" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="检查网络" />
                 </StackPanel>
             </StackPanel>
         </Border>
 
-        <!-- 3x3 grid -->
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding Cards}" Margin="14">
+        <!-- Tab strip / context -->
+        <Border Grid.Row="1" Background="{StaticResource BrushBg2}"
+                BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Margin="14,0">
+                <Border BorderBrush="{StaticResource BrushCyan}" BorderThickness="0,0,0,2" Padding="14,10">
+                    <TextBlock Text="总览 · 全部设备" Foreground="{StaticResource BrushCyan}" FontSize="13" />
+                </Border>
+                <TextBlock Text="A 区 · 标准箱组" Foreground="{StaticResource BrushTxt2}" FontSize="13"
+                           VerticalAlignment="Center" Margin="16,0" />
+                <TextBlock Text="B 区 · 特种箱组" Foreground="{StaticResource BrushTxt2}" FontSize="13"
+                           VerticalAlignment="Center" Margin="0,0,16,0" />
+                <TextBlock Text="C 区 · 备用" Foreground="{StaticResource BrushTxt2}" FontSize="13"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- 3x3 device grid. A plain ItemsControl (no ScrollViewer) measures the UniformGrid at the
+             available width, so the three columns always fit the content area and never overflow. -->
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Cards}" Margin="14"
+                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Columns="3" Rows="3" />
@@ -47,51 +98,170 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource DeviceCardSurface}" Margin="5">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                    <!-- Whole card is a button so a click opens the single view (design: clickable cards).
+                         It stretches to fill its UniformGrid cell (one third of the content width). -->
+                    <Button Margin="5" Padding="0" Background="Transparent" BorderThickness="0"
+                            Cursor="Hand"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                            Command="{Binding DataContext.ActivateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding Id}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="card" Background="{StaticResource BrushBg2}"
+                                        BorderBrush="{StaticResource BrushLine1}" BorderThickness="1"
+                                        CornerRadius="4" SnapsToDevicePixels="True">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="4" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
 
-                            <!-- Left accent bar -->
-                            <Border Width="4" HorizontalAlignment="Left" VerticalAlignment="Stretch"
-                                    Grid.Row="0" Grid.RowSpan="3"
-                                    Background="{Binding Status, Converter={StaticResource StatusToBrush}}" />
+                                        <!-- Left status band -->
+                                        <Border Grid.Column="0"
+                                                Background="{Binding Status, Converter={StaticResource StatusToBrush}}" />
 
-                            <!-- Header -->
-                            <DockPanel Grid.Row="0" LastChildFill="False" Margin="14,2,2,8">
-                                <TextBlock DockPanel.Dock="Left" Style="{StaticResource MonoText}"
-                                           FontSize="15" Text="{Binding Id}" />
-                                <Border DockPanel.Dock="Right"
-                                        Background="{Binding Status, Converter={StaticResource StatusToBrush}}"
-                                        CornerRadius="9" Padding="8,2">
-                                    <TextBlock Foreground="White" FontSize="11"
-                                               Text="{Binding Status, Converter={StaticResource StatusToLabel}}" />
+                                        <!-- Body -->
+                                        <Grid Grid.Column="1" Margin="12,10,12,10">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Header: id + bay + status pill -->
+                                            <Grid Grid.Row="0">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                    <TextBlock Style="{StaticResource MonoText}" FontSize="15"
+                                                               Text="{Binding Id}" VerticalAlignment="Center" />
+                                                    <TextBlock Style="{StaticResource CardLabel}" Margin="8,0,0,0"
+                                                               VerticalAlignment="Center" Text="{Binding Bay}" />
+                                                </StackPanel>
+                                                <Border HorizontalAlignment="Right" CornerRadius="9" Padding="9,2"
+                                                        Background="{Binding Status, Converter={StaticResource StatusToBrush}, ConverterParameter=Bg}"
+                                                        BorderThickness="1"
+                                                        BorderBrush="{Binding Status, Converter={StaticResource StatusToBrush}}">
+                                                    <TextBlock FontSize="11" FontWeight="SemiBold"
+                                                               Foreground="{Binding Status, Converter={StaticResource StatusToBrush}}"
+                                                               Text="{Binding Status, Converter={StaticResource StatusToLabel}}" />
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- Program name / type line -->
+                                            <TextBlock Grid.Row="1" Margin="0,4,0,0" FontSize="11"
+                                                       Foreground="{StaticResource BrushTxt2}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Text="{Binding ProgramName, FallbackValue=空闲, TargetNullValue=空闲}" />
+
+                                            <!-- Readings: temperature + optional humidity -->
+                                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                                                <StackPanel Margin="0,0,26,0">
+                                                    <TextBlock Style="{StaticResource CardLabel}" Text="温度" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Style="{StaticResource MonoText}" FontSize="24"
+                                                                   Text="{Binding Pv, StringFormat={}{0:F1}, TargetNullValue=——}" />
+                                                        <TextBlock Style="{StaticResource UnitText}" Text="°C" />
+                                                    </StackPanel>
+                                                    <TextBlock Style="{StaticResource MonoText}" FontSize="10"
+                                                               Foreground="{StaticResource BrushTxt3}"
+                                                               Text="{Binding Sv, StringFormat=SP {0:F1}, TargetNullValue=SP —}" />
+                                                </StackPanel>
+                                                <StackPanel Visibility="{Binding HasHumidity, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Style="{StaticResource CardLabel}" Text="湿度" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Style="{StaticResource MonoText}" FontSize="24"
+                                                                   Text="{Binding Humidity, StringFormat={}{0:F1}, TargetNullValue=——}" />
+                                                        <TextBlock Style="{StaticResource UnitText}" Text="%RH" />
+                                                    </StackPanel>
+                                                    <TextBlock Style="{StaticResource MonoText}" FontSize="10"
+                                                               Foreground="{StaticResource BrushTxt3}"
+                                                               Text="{Binding HumiditySv, StringFormat=SP {0:F1}, TargetNullValue=SP —}" />
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Mini trend sparkline -->
+                                            <Border Grid.Row="3" Margin="0,8,0,0" Height="38"
+                                                    BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,1,0,1">
+                                                <Viewbox Stretch="Fill" StretchDirection="Both">
+                                                    <!-- ViewModel maps PV history into a 240x36 viewport. -->
+                                                    <Canvas Width="240" Height="36">
+                                                        <Polyline Points="{Binding TrendPoints}"
+                                                                  Stroke="{StaticResource BrushSeriesTemp}"
+                                                                  StrokeThickness="1.25"
+                                                                  StrokeLineJoin="Round" />
+                                                    </Canvas>
+                                                </Viewbox>
+                                            </Border>
+
+                                            <!-- Program progress: seg / cycle / remain -->
+                                            <Grid Grid.Row="4" Margin="0,8,0,0">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource BrushTxt2}" Text="段 " />
+                                                    <TextBlock Style="{StaticResource MonoText}" FontSize="11"
+                                                               Text="{Binding SegmentDisplay}" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource BrushTxt2}" Text="循环 " />
+                                                    <TextBlock Style="{StaticResource MonoText}" FontSize="11"
+                                                               Text="{Binding CycleDisplay}" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource BrushTxt2}" Text="剩余 " />
+                                                    <TextBlock Style="{StaticResource MonoText}" FontSize="11"
+                                                               Text="{Binding RemainDisplay}" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!-- Alarm message row (alarm cards only). Message sits in a star
+                                                 column so it trims instead of widening the whole card grid. -->
+                                            <Border Grid.Row="5" Margin="0,8,0,0" Padding="8,5" CornerRadius="3"
+                                                    Background="{StaticResource BrushAlarmBg}"
+                                                    BorderBrush="{StaticResource BrushAlarm}" BorderThickness="1"
+                                                    Visibility="{Binding HasAlarm, Converter={StaticResource BoolToVis}}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Style="{StaticResource MonoText}" FontSize="11"
+                                                               Foreground="{StaticResource BrushAlarm}"
+                                                               Text="{Binding AlarmCode}" Margin="0,0,6,0" />
+                                                    <TextBlock Grid.Column="1" FontSize="11" Foreground="{StaticResource BrushTxt0}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Text="{Binding AlarmMessage}" />
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- Pause reason row (paused cards only) -->
+                                            <Border Grid.Row="5" Margin="0,8,0,0" Padding="8,5" CornerRadius="3"
+                                                    Background="{StaticResource BrushPauseBg}"
+                                                    BorderBrush="{StaticResource BrushPause}" BorderThickness="1"
+                                                    Visibility="{Binding HasPauseNote, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock FontSize="11" Foreground="{StaticResource BrushPause}"
+                                                           TextTrimming="CharacterEllipsis" Text="{Binding Note}" />
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
                                 </Border>
-                            </DockPanel>
-
-                            <!-- Bay -->
-                            <TextBlock Grid.Row="1" Margin="14,0" Style="{StaticResource LabelText}"
-                                       Text="{Binding Bay}" />
-
-                            <!-- PV / SV row -->
-                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,8,0,4">
-                                <StackPanel Margin="0,0,24,0">
-                                    <TextBlock Style="{StaticResource LabelText}" Text="温度 PV" />
-                                    <TextBlock Style="{StaticResource MonoText}" FontSize="22"
-                                               Text="{Binding Pv, StringFormat={}{0:F2}}" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource LabelText}" Text="温度 SV" />
-                                    <TextBlock Style="{StaticResource MonoText}" FontSize="22"
-                                               Foreground="{StaticResource BrushTxt2}"
-                                               Text="{Binding Sv, StringFormat={}{0:F2}}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                                <ControlTemplate.Triggers>
+                                    <!-- Hover: brighten the border (design's dev-card:hover). -->
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource BrushLine3}" />
+                                    </Trigger>
+                                    <!-- Offline cards are dimmed/disabled-looking. -->
+                                    <DataTrigger Binding="{Binding Online}" Value="False">
+                                        <Setter TargetName="card" Property="Opacity" Value="0.55" />
+                                    </DataTrigger>
+                                    <!-- Alarm cards get a red-tinted border. -->
+                                    <DataTrigger Binding="{Binding HasAlarm}" Value="True">
+                                        <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource BrushAlarm}" />
+                                    </DataTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
