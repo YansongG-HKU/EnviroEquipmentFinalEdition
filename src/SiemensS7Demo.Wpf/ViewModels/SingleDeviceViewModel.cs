@@ -15,6 +15,7 @@ public sealed partial class SingleDeviceViewModel : ObservableObject, IDisposabl
     private readonly IDeviceSessionManager? _sessionManager;
     private readonly IRbacContext _rbac;
     private readonly Dictionary<string, Device> _snapshots = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _applyLock = new();
     private SynchronizationContext? _uiContext;
     private IDisposable? _subscription;
 
@@ -86,19 +87,26 @@ public sealed partial class SingleDeviceViewModel : ObservableObject, IDisposabl
 
     private void Apply(Device d)
     {
-        _snapshots[d.Id.Value] = d;
-        if (SelectedDeviceId == d.Id.Value)
+        // See OverviewViewModel: serialize concurrent device-thread publishes in headless mode.
+        lock (_applyLock)
         {
-            HydrateFrom(d);
+            _snapshots[d.Id.Value] = d;
+            if (SelectedDeviceId == d.Id.Value)
+            {
+                HydrateFrom(d);
+            }
         }
     }
 
     public void Select(string deviceId)
     {
         SelectedDeviceId = deviceId;
-        if (_snapshots.TryGetValue(deviceId, out var d))
+        lock (_applyLock)
         {
-            HydrateFrom(d);
+            if (_snapshots.TryGetValue(deviceId, out var d))
+            {
+                HydrateFrom(d);
+            }
         }
     }
 

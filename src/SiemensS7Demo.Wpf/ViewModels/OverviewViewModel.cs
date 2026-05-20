@@ -13,6 +13,7 @@ namespace SiemensS7Demo.Wpf.ViewModels;
 public sealed partial class OverviewViewModel : ObservableObject, IDisposable
 {
     private readonly IDeviceSessionManager? _sessionManager;
+    private readonly object _applyLock = new();
     private SynchronizationContext? _uiContext;
     private IDisposable? _subscription;
 
@@ -62,18 +63,25 @@ public sealed partial class OverviewViewModel : ObservableObject, IDisposable
 
     private void Apply(Device device)
     {
-        var existing = Cards.FirstOrDefault(c => c.Id == device.Id.Value);
-        if (existing is null)
+        // In headless mode there is no UI dispatcher to serialize callbacks, so multiple
+        // device polling threads can publish concurrently. Guard the ObservableCollection
+        // mutation + counter recompute. In the running app every call already arrives on the
+        // UI thread, so this lock is uncontended there.
+        lock (_applyLock)
         {
-            var card = new DeviceCardViewModel();
-            card.Apply(device);
-            Cards.Add(card);
+            var existing = Cards.FirstOrDefault(c => c.Id == device.Id.Value);
+            if (existing is null)
+            {
+                var card = new DeviceCardViewModel();
+                card.Apply(device);
+                Cards.Add(card);
+            }
+            else
+            {
+                existing.Apply(device);
+            }
+            Recompute();
         }
-        else
-        {
-            existing.Apply(device);
-        }
-        Recompute();
     }
 
     private void Recompute()

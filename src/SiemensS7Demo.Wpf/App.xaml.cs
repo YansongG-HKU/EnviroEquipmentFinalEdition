@@ -47,6 +47,9 @@ public partial class App : Application
         if (TryGetHeadlessSwitch(e.Args))
         {
             var runner = _host.Services.GetRequiredService<HeadlessSmokeRunner>();
+            runner.SessionManager = _host.Services.GetRequiredService<IDeviceSessionManager>();
+            runner.Overview = _host.Services.GetRequiredService<OverviewViewModel>();
+            runner.Single = _host.Services.GetRequiredService<SingleDeviceViewModel>();
             var exitCode = await runner.RunAsync();
             Shutdown(exitCode);
             return;

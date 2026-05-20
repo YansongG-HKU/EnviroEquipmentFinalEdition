@@ -24,4 +24,7 @@
     <ProjectReference Include="..\SiemensS7Demo.Domain\SiemensS7Demo.Domain.csproj" />
     <ProjectReference Include="..\SiemensS7Demo.App\SiemensS7Demo.App.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
