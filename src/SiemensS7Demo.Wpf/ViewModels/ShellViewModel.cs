@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SiemensS7Demo.Wpf.ViewModels.Alarms;
 
 namespace SiemensS7Demo.Wpf.ViewModels;
 
@@ -10,14 +11,26 @@ public sealed partial class ShellViewModel : ObservableObject
 {
     private readonly OverviewViewModel _overview;
     private readonly SingleDeviceViewModel _single;
+    private readonly CurrentAlarmsViewModel? _currentAlarms;
+    private readonly HistoryAlarmsViewModel? _historyAlarms;
     private DispatcherTimer? _clockTimer;
 
     public ShellViewModel(OverviewViewModel overview, SingleDeviceViewModel single)
+        : this(overview, single, null, null) { }
+
+    public ShellViewModel(
+        OverviewViewModel overview,
+        SingleDeviceViewModel single,
+        CurrentAlarmsViewModel? currentAlarms,
+        HistoryAlarmsViewModel? historyAlarms)
     {
         _overview = overview;
         _single = single;
+        _currentAlarms = currentAlarms;
+        _historyAlarms = historyAlarms;
         _activeScreenViewModel = _overview;
         UpdateClock();
+        BuildNavItems();
     }
 
     [ObservableProperty]
@@ -63,23 +76,26 @@ public sealed partial class ShellViewModel : ObservableObject
     private int _warningCount;
 
     /// <summary>
-    /// Left navigation. Only 总览 (overview) and 当前试验 (single) are wired in Pkg 1; the rest
-    /// are visible-but-disabled placeholders for later packages, mirroring NAV_ITEMS in mock-data.jsx.
+    /// Left navigation. Overview + 当前试验 are wired in Pkg 1; Pkg 2 wires 报警中心 (current)
+    /// and 历史试验 (alarm history) when those VMs are supplied via DI. Anything still null
+    /// renders as a disabled placeholder.
     /// </summary>
-    public IReadOnlyList<NavItem> NavItems { get; } = new List<NavItem>
+    public List<NavItem> NavItems { get; } = new();
+
+    private void BuildNavItems()
     {
-        new("overview", "总览",       "grid",    IsEnabled: true),
-        new("single",   "当前试验",   "monitor", IsEnabled: true),
-        new("program",  "程序编辑",   "edit",    IsEnabled: false),
-        new("history",  "历史试验",   "archive", IsEnabled: false),
-        new("alarm",    "报警中心",   "alarm",   IsEnabled: false),
-        new("lims",     "LIMS / 黑灯", "link",   IsEnabled: false),
-        new("layout",   "监控布局",   "layout",  IsEnabled: false),
-        new("device",   "设备接入",   "plug",    IsEnabled: false),
-        new("maint",    "设备维护",   "tool",    IsEnabled: false),
-        new("users",    "用户与权限", "users",   IsEnabled: false),
-        new("settings", "系统设置",   "cog",     IsEnabled: false),
-    };
+        NavItems.Add(new("overview", "总览", "grid", IsEnabled: true));
+        NavItems.Add(new("single", "当前试验", "monitor", IsEnabled: true));
+        NavItems.Add(new("program", "程序编辑", "edit", IsEnabled: false));
+        NavItems.Add(new("history", "历史试验", "archive", IsEnabled: _historyAlarms is not null));
+        NavItems.Add(new("alarm", "报警中心", "alarm", IsEnabled: _currentAlarms is not null));
+        NavItems.Add(new("lims", "LIMS / 黑灯", "link", IsEnabled: false));
+        NavItems.Add(new("layout", "监控布局", "layout", IsEnabled: false));
+        NavItems.Add(new("device", "设备接入", "plug", IsEnabled: false));
+        NavItems.Add(new("maint", "设备维护", "tool", IsEnabled: false));
+        NavItems.Add(new("users", "用户与权限", "users", IsEnabled: false));
+        NavItems.Add(new("settings", "系统设置", "cog", IsEnabled: false));
+    }
 
     /// <summary>
     /// Connect this shell to the live overview VM: surface its alarm count in the top bar.
@@ -131,7 +147,9 @@ public sealed partial class ShellViewModel : ObservableObject
         ActiveScreenViewModel = id switch
         {
             "single" => _single,
-            _        => _overview,
+            "alarm" => (object?)_currentAlarms ?? _overview,
+            "history" => (object?)_historyAlarms ?? _overview,
+            _ => _overview,
         };
     }
 

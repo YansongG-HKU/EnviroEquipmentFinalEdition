@@ -10,6 +10,7 @@ using SiemensS7Demo.App;
 using SiemensS7Demo.Wpf.Smoke;
 using SiemensS7Demo.Wpf.Views;
 using SiemensS7Demo.Wpf.ViewModels;
+using SiemensS7Demo.Wpf.ViewModels.Alarms;
 
 namespace SiemensS7Demo.Wpf;
 
@@ -35,9 +36,11 @@ public partial class App : Application
             .ConfigureServices((ctx, services) =>
             {
                 services.AddSiemensS7DemoApp();
-                services.AddSingleton<ShellViewModel>();
                 services.AddSingleton<OverviewViewModel>();
                 services.AddTransient<SingleDeviceViewModel>();
+                services.AddSingleton<CurrentAlarmsViewModel>();
+                services.AddSingleton<HistoryAlarmsViewModel>();
+                services.AddSingleton<ShellViewModel>();
                 services.AddSingleton<Shell>();
                 services.AddTransient<HeadlessSmokeRunner>();
             })
@@ -62,6 +65,12 @@ public partial class App : Application
         // lands on the UI thread captured here).
         var overview = _host.Services.GetRequiredService<OverviewViewModel>();
         var single = _host.Services.GetRequiredService<SingleDeviceViewModel>();
+        // Eagerly resolve the alarm service so its subscription is live BEFORE we start polling.
+        // The Current/History VMs are singletons and subscribe in their ctors, so resolving them
+        // here keeps the alarm pipeline hot from the first device snapshot.
+        _ = _host.Services.GetRequiredService<SiemensS7Demo.App.Alarms.IAlarmService>();
+        _ = _host.Services.GetRequiredService<CurrentAlarmsViewModel>();
+        _ = _host.Services.GetRequiredService<HistoryAlarmsViewModel>();
         var shellVm = _host.Services.GetRequiredService<ShellViewModel>();
         overview.Subscribe();
         single.Subscribe();
