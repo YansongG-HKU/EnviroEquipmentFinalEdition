@@ -7,6 +7,8 @@ namespace SiemensS7Demo.Wpf.Converters;
 
 public sealed class StatusToLabelConverter : IValueConverter
 {
+    public static readonly NotVisibleWhenTrueConverter NotVisibleWhenTrue = new();
+
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value switch
         {
@@ -18,6 +20,15 @@ public sealed class StatusToLabelConverter : IValueConverter
             DeviceStatus.Offline   => "离线",
             _                      => "—",
         };
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+public sealed class NotVisibleWhenTrueConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is bool b && b ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
