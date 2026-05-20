@@ -21,6 +21,9 @@
         <DataTemplate DataType="{x:Type vmalarms:CurrentAlarmsViewModel}">
             <valarms:CurrentAlarmsView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vmalarms:HistoryAlarmsViewModel}">
+            <valarms:HistoryAlarmsView />
+        </DataTemplate>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
