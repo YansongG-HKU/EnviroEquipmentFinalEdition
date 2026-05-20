@@ -1,0 +1,76 @@
+<UserControl x:Class="SiemensS7Demo.Wpf.Views.LoginView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SiemensS7Demo.Wpf.ViewModels"
+             Background="{DynamicResource BrushBg1}">
+    <UserControl.Resources>
+        <vm:LoginStepToVisibilityConverter x:Key="StepVis"/>
+    </UserControl.Resources>
+    <Grid>
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                Width="880" Background="{DynamicResource BrushBg2}"
+                BorderBrush="{DynamicResource BrushLine1}" BorderThickness="1"
+                CornerRadius="8" Padding="0">
+            <StackPanel>
+                <TextBlock Text="温箱控制系统" FontSize="18"
+                           Foreground="{DynamicResource BrushTxt0}"
+                           Margin="32,28,32,4"/>
+
+                <!-- Step 1: account list -->
+                <ItemsControl ItemsSource="{Binding KnownAccounts}" Margin="32,18"
+                              Visibility="{Binding Step, Converter={StaticResource StepVis}, ConverterParameter=SelectAccount}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Display}" Margin="6" Padding="14"
+                                    Tag="{Binding Code}"
+                                    Click="OnSelectAccount"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Step 2: password -->
+                <StackPanel Margin="40,16"
+                            Visibility="{Binding Step, Converter={StaticResource StepVis}, ConverterParameter=EnterPassword}">
+                    <TextBlock Text="登录密码" Foreground="{DynamicResource BrushTxt1}"/>
+                    <PasswordBox x:Name="PwdBox" PasswordChanged="OnPwdChanged"
+                                 FontFamily="Consolas" FontSize="16" Margin="0,6,0,12"/>
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource BrushAlarm}"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                        <Button Content="返回" Command="{Binding BackCommand}" Margin="0,0,8,0" Padding="14,6"/>
+                        <Button Content="下一步 · 确认班次"
+                                Command="{Binding SubmitPasswordCommand}" Padding="14,6"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Step 3: shift -->
+                <StackPanel Margin="40,16"
+                            Visibility="{Binding Step, Converter={StaticResource StepVis}, ConverterParameter=ConfirmShift}">
+                    <TextBlock Text="本次值班的班次" Foreground="{DynamicResource BrushTxt1}"/>
+                    <ItemsControl ItemsSource="{Binding Shifts}" Margin="0,8">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Margin="4" Padding="8,12"
+                                        Content="{Binding Name}"
+                                        Click="OnSelectShift"
+                                        Tag="{Binding}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                        <Button Content="返回" Command="{Binding BackCommand}" Margin="0,0,8,0" Padding="14,6"/>
+                        <Button Content="进入系统"
+                                Command="{Binding ConfirmShiftCommand}" Padding="14,6"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
