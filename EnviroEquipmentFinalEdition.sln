@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiemensS7Demo.Wpf", "src\Si
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnviroEquipment.Wpf.Tests", "tests\EnviroEquipment.Wpf.Tests\EnviroEquipment.Wpf.Tests.csproj", "{BBBF949A-8E96-4562-821C-3B49E8122AAD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnviroEquipment.App.Tests", "tests\EnviroEquipment.App.Tests\EnviroEquipment.App.Tests.csproj", "{BEEE9CA5-503E-4E3A-AFD7-86613ABA284C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{BBBF949A-8E96-4562-821C-3B49E8122AAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBBF949A-8E96-4562-821C-3B49E8122AAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBBF949A-8E96-4562-821C-3B49E8122AAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEEE9CA5-503E-4E3A-AFD7-86613ABA284C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEEE9CA5-503E-4E3A-AFD7-86613ABA284C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEEE9CA5-503E-4E3A-AFD7-86613ABA284C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEEE9CA5-503E-4E3A-AFD7-86613ABA284C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8F1CF017-2C97-4223-BDBE-7D47780A3734} = {344D2D82-8C89-43A4-9C08-7D8424A586B2}
@@ -67,5 +73,6 @@ Global
 		{8ABC0CDE-F149-46C0-B272-ED6D891EDF5D} = {C38DE23F-5016-4A6C-BA91-9EB6B43F0B9C}
 		{1667489A-D8D5-45E4-8D59-2E90AB2DBB62} = {C38DE23F-5016-4A6C-BA91-9EB6B43F0B9C}
 		{BBBF949A-8E96-4562-821C-3B49E8122AAD} = {344D2D82-8C89-43A4-9C08-7D8424A586B2}
+		{BEEE9CA5-503E-4E3A-AFD7-86613ABA284C} = {344D2D82-8C89-43A4-9C08-7D8424A586B2}
 	EndGlobalSection
 EndGlobal
