@@ -1,0 +1,6 @@
+namespace SiemensS7Demo.Domain;
+
+public sealed record DeviceId(string Value)
+{
+    public override string ToString() => Value;
+}

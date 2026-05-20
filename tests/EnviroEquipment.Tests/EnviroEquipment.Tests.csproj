@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SiemensS7Demo\SiemensS7Demo.csproj" />
+    <ProjectReference Include="..\..\src\SiemensS7Demo.Core\SiemensS7Demo.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,203 @@
+<Window x:Class="SiemensS7Demo.Wpf.Views.Shell"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:SiemensS7Demo.Wpf.ViewModels"
+        xmlns:views="clr-namespace:SiemensS7Demo.Wpf.Views"
+        Title="温箱控制系统"
+        Width="1600" Height="920"
+        MinWidth="1280" MinHeight="800"
+        WindowState="Maximized"
+        Background="{StaticResource BrushBg1}"
+        TextOptions.TextFormattingMode="Display">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:OverviewViewModel}">
+            <views:OverviewView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SingleDeviceViewModel}">
+            <views:SingleDeviceView />
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ───────── TopBar ───────── -->
+        <Border Grid.Row="0" Style="{StaticResource TopBarSurface}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Brand block -->
+                <Border Grid.Column="0" BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,1,0"
+                        Padding="16,0" MinWidth="220">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="20" Height="20" BorderBrush="{StaticResource BrushCyan}" BorderThickness="1.5"
+                                Margin="0,0,10,0">
+                            <Border Background="{StaticResource BrushCyan}" Opacity="0.4" Margin="3" />
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="{Binding BrandTitle}" Foreground="{StaticResource BrushTxt0}"
+                                       FontSize="13" FontWeight="Medium" />
+                            <TextBlock Text="{Binding BrandSubtitle}" Foreground="{StaticResource BrushTxt3}"
+                                       FontSize="9" Margin="0,1,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Breadcrumb -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="实验室" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding LabName}" Foreground="{StaticResource BrushTxt1}" FontSize="12"
+                               Margin="10,0" VerticalAlignment="Center" />
+                    <TextBlock Text="/" Foreground="{StaticResource BrushTxt4}" VerticalAlignment="Center" />
+                    <TextBlock Style="{StaticResource CardLabel}" Text="班次" Margin="10,0,0,0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Shift}" Foreground="{StaticResource BrushTxt1}" FontSize="12"
+                               Margin="10,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Alarm summary -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
+                    <Border BorderBrush="{StaticResource BrushLine1}" BorderThickness="1,0" Padding="14,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Margin="0,0,6,0"
+                                     Fill="{StaticResource BrushAlarm}" />
+                            <TextBlock Text="严重" Foreground="{StaticResource BrushTxt2}" FontSize="11"
+                                       VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Style="{StaticResource MonoText}" FontSize="14"
+                                       Foreground="{StaticResource BrushAlarm}"
+                                       Text="{Binding AlarmCount, StringFormat={}{0:D2}}" />
+                        </StackPanel>
+                    </Border>
+                    <Border BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,1,0" Padding="14,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Margin="0,0,6,0"
+                                     Fill="{StaticResource BrushWarn}" />
+                            <TextBlock Text="警告" Foreground="{StaticResource BrushTxt2}" FontSize="11"
+                                       VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Style="{StaticResource MonoText}" FontSize="14"
+                                       Foreground="{StaticResource BrushWarn}"
+                                       Text="{Binding WarningCount, StringFormat={}{0:D2}}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Clock -->
+                <Border Grid.Column="4" BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,1,0"
+                        Padding="16,0" MinWidth="120">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource MonoText}" FontSize="15" Text="{Binding Clock}" />
+                        <TextBlock Foreground="{StaticResource BrushTxt3}" FontSize="10" Margin="0,2,0,0"
+                                   Text="{Binding ClockDate}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- User chip -->
+                <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                    <Border Width="24" Height="24" Background="{StaticResource BrushBg4}"
+                            BorderBrush="{StaticResource BrushLine2}" BorderThickness="1" Margin="0,0,10,0">
+                        <TextBlock Style="{StaticResource MonoText}" Text="{Binding UserInitial}"
+                                   Foreground="{StaticResource BrushCyan}" FontSize="11"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="{Binding UserName}" Foreground="{StaticResource BrushTxt0}" FontSize="12" />
+                        <TextBlock Text="SESSION · 02:14:08" Foreground="{StaticResource BrushTxt3}" FontSize="10"
+                                   Margin="0,1,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ───────── Body: SideNav + content router ───────── -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource SideNavSurface}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="主导航" Foreground="{StaticResource BrushTxt3}"
+                               FontSize="10" Margin="12,12,12,8" />
+                    <!-- Footer connection status -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="14,10"
+                                ><StackPanel.Resources>
+                            <Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource BrushTxt3}" /><Setter Property="FontSize" Value="10" /></Style>
+                        </StackPanel.Resources>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource BrushOk}" Margin="0,0,6,0" />
+                            <TextBlock Text="后端服务 · 已连接" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource BrushOk}" Margin="0,0,6,0" />
+                            <TextBlock Text="{Binding ActiveScreenViewModel.OnlineCount, StringFormat=在线设备 {0}, FallbackValue=设备在线}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <ItemsControl ItemsSource="{Binding NavItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <!-- Active indicator bar -->
+                                    <Border Width="2" HorizontalAlignment="Left" Background="{StaticResource BrushCyan}"
+                                            Margin="0,4">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Value="True">
+                                                        <DataTrigger.Binding>
+                                                            <MultiBinding Converter="{x:Static vm:NavActiveConverter.Instance}">
+                                                                <Binding Path="Id" />
+                                                                <Binding Path="DataContext.ActiveScreen" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                            </MultiBinding>
+                                                        </DataTrigger.Binding>
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                    <Button Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding Id}"
+                                            IsEnabled="{Binding IsEnabled}"
+                                            Style="{StaticResource NavItemButton}">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DockPanel>
+            </Border>
+
+            <ContentControl Grid.Column="1" Content="{Binding ActiveScreenViewModel}"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+        </Grid>
+
+        <!-- ───────── StatusBar ───────── -->
+        <Border Grid.Row="2" Style="{StaticResource StatusBarSurface}">
+            <DockPanel LastChildFill="False">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Margin="12,0" VerticalAlignment="Center">
+                    <Ellipse Width="6" Height="6" Fill="{StaticResource BrushOk}" Margin="0,0,8,0" />
+                    <TextBlock Text="连接" Foreground="{StaticResource BrushTxt3}" FontSize="11" Margin="0,0,6,0" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="11" Foreground="{StaticResource BrushTxt1}" Text="OK" />
+                    <TextBlock Text="活动设备" Foreground="{StaticResource BrushTxt3}" FontSize="11" Margin="16,0,6,0" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="11" Foreground="{StaticResource BrushTxt1}"
+                               Text="{Binding ActiveScreenViewModel.OnlineCount, FallbackValue=—}" />
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Right" Margin="0,0,14,0" VerticalAlignment="Center"
+                           Foreground="{StaticResource BrushTxt3}" FontSize="11" Text="温箱 v4.2.1 · build 20260418" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

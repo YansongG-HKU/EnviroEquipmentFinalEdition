@@ -708,7 +708,7 @@ static async Task<int> RunSelfTestAsync(DemoRunOptions runOptions, CancellationT
 
     await RunAsync("project JSON validates", () =>
     {
-        var projectPath = runOptions.ProjectPath ?? "src\\SiemensS7Demo\\Config\\project.sample.json";
+        var projectPath = runOptions.ProjectPath ?? "src\\SiemensS7Demo.Core\\Config\\project.sample.json";
         var project = ProjectConfigLoader.Load(projectPath);
         var issues = ConfigValidationService.ValidateProject(project);
         if (ConfigValidationService.HasErrors(issues))

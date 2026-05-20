@@ -1,0 +1,176 @@
+<UserControl x:Class="SiemensS7Demo.Wpf.Views.SingleDeviceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:SiemensS7Demo.Wpf.Converters"
+             Background="{StaticResource BrushBg1}">
+    <UserControl.Resources>
+        <conv:StatusToBrushConverter x:Key="StatusToBrush" />
+        <conv:StatusToLabelConverter x:Key="StatusToLabel" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="340" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Status banner (spans top, left column) -->
+        <Border Grid.Row="0" Grid.Column="0" Padding="20,12"
+                Background="{StaticResource BrushBg2}"
+                BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,1,1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="20" FontWeight="Medium"
+                               Text="{Binding SelectedDeviceId, FallbackValue=未选择设备}" Margin="0,0,12,0" />
+                    <Border CornerRadius="9" Padding="9,2" VerticalAlignment="Center"
+                            Background="{Binding SelectedStatus, Converter={StaticResource StatusToBrush}, ConverterParameter=Bg}"
+                            BorderThickness="1"
+                            BorderBrush="{Binding SelectedStatus, Converter={StaticResource StatusToBrush}}">
+                        <TextBlock FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{Binding SelectedStatus, Converter={StaticResource StatusToBrush}}"
+                                   Text="{Binding SelectedStatus, Converter={StaticResource StatusToLabel}}" />
+                    </Border>
+                    <TextBlock Foreground="{StaticResource BrushTxt2}" FontSize="12" Margin="14,0,0,0"
+                               VerticalAlignment="Center" Text="{Binding Bay}" />
+                </StackPanel>
+                <TextBlock Foreground="{StaticResource BrushTxt2}" FontSize="12" Margin="0,6,0,0"
+                           Text="{Binding ProgramName, FallbackValue=—, TargetNullValue=—}" />
+            </StackPanel>
+        </Border>
+
+        <!-- HERO readings (temp / humidity PV vs SV) -->
+        <Border Grid.Row="1" Grid.Column="0" Padding="20,18"
+                Background="{StaticResource BrushBg1}"
+                BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,1,1">
+            <StackPanel Orientation="Horizontal">
+                <!-- Temperature -->
+                <StackPanel Margin="0,0,48,0">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="温度" />
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="4" Height="44" CornerRadius="2" Margin="0,0,10,0"
+                                Background="{StaticResource BrushSeriesTemp}" VerticalAlignment="Center" />
+                        <TextBlock Style="{StaticResource MonoText}" FontSize="52" FontWeight="Medium"
+                                   Text="{Binding Pv, StringFormat={}{0:F1}, TargetNullValue=——}" />
+                        <TextBlock Style="{StaticResource UnitText}" FontSize="14" Text="°C" />
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="12" Foreground="{StaticResource BrushTxt3}"
+                               Text="{Binding Sv, StringFormat=设定 {0:F1}, TargetNullValue=设定 —}" Margin="14,4,0,0" />
+                </StackPanel>
+                <!-- Humidity -->
+                <StackPanel Visibility="{Binding HasHumidity, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="湿度" />
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="4" Height="44" CornerRadius="2" Margin="0,0,10,0"
+                                Background="{StaticResource BrushSeriesHumid}" VerticalAlignment="Center" />
+                        <TextBlock Style="{StaticResource MonoText}" FontSize="52" FontWeight="Medium"
+                                   Text="{Binding Humidity, StringFormat={}{0:F1}, TargetNullValue=——}" />
+                        <TextBlock Style="{StaticResource UnitText}" FontSize="14" Text="%RH" />
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="12" Foreground="{StaticResource BrushTxt3}"
+                               Text="{Binding HumiditySv, StringFormat=设定 {0:F1}, TargetNullValue=设定 —}" Margin="14,4,0,0" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Trend area (Polyline sparkline; OxyPlot is Pkg 3) -->
+        <Border Grid.Row="2" Grid.Column="0" Margin="14"
+                Background="{StaticResource BrushBg2}"
+                BorderBrush="{StaticResource BrushLine1}" BorderThickness="1" CornerRadius="4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource CardLabel}" Margin="14,10"
+                           Text="实时趋势 · 采样 1 Hz" />
+                <Viewbox Grid.Row="1" Stretch="Fill" Margin="14,0,14,14">
+                    <Canvas Width="760" Height="220" Background="{StaticResource BrushBg2}">
+                        <!-- mid grid line -->
+                        <Line X1="0" Y1="110" X2="760" Y2="110"
+                              Stroke="{StaticResource BrushLine1}" StrokeThickness="1" StrokeDashArray="2 3" />
+                        <Polyline Points="{Binding TrendPoints}"
+                                  Stroke="{StaticResource BrushSeriesTemp}" StrokeThickness="1.5"
+                                  StrokeLineJoin="Round" />
+                    </Canvas>
+                </Viewbox>
+            </Grid>
+        </Border>
+
+        <!-- Bottom action bar (left column): commands + SV write -->
+        <Border Grid.Row="3" Grid.Column="0" Padding="14,12"
+                Background="{StaticResource BrushBg2}"
+                BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,1,1,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="运行" Style="{StaticResource PrimaryFlatButton}" Command="{Binding RunCommand}" Margin="0,0,8,0" />
+                <Button Content="暂停" Style="{StaticResource GhostFlatButton}" Command="{Binding PauseCommand}" Margin="0,0,8,0" />
+                <Button Content="停止" Style="{StaticResource DangerFlatButton}" Command="{Binding StopCommand}" Margin="0,0,8,0" />
+                <Button Content="报警复位" Style="{StaticResource GhostFlatButton}" Command="{Binding ResetCommand}" Margin="0,0,20,0" />
+
+                <TextBlock Style="{StaticResource CardLabel}" Text="新 SV 写入" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox Width="100" Height="36" VerticalContentAlignment="Center" Margin="0,0,8,0"
+                         Background="{StaticResource BrushBg3}" Foreground="{StaticResource BrushTxt0}"
+                         BorderBrush="{StaticResource BrushLine2}"
+                         Text="{Binding NewSvInput, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:F2}}" />
+                <Button Content="写入" Style="{StaticResource PrimaryFlatButton}" Command="{Binding WriteSetpointCommand}" />
+                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" FontSize="11"
+                           Foreground="{StaticResource BrushAlarm}" Text="{Binding LastWriteError}"
+                           Visibility="{Binding LastWriteOk, Converter={x:Static conv:StatusToLabelConverter.NotVisibleWhenTrue}, FallbackValue=Collapsed}" />
+            </StackPanel>
+        </Border>
+
+        <!-- ───────── Right column: state + program + ops ───────── -->
+        <Border Grid.Row="0" Grid.RowSpan="4" Grid.Column="1"
+                Background="{StaticResource BrushBg2}"
+                BorderBrush="{StaticResource BrushLine1}" BorderThickness="0">
+            <StackPanel>
+                <!-- Current state -->
+                <StackPanel Margin="14" >
+                    <TextBlock Style="{StaticResource CardLabel}" Text="当前状态" Margin="0,0,0,10" />
+                    <Border CornerRadius="4" Padding="12,10"
+                            Background="{Binding SelectedStatus, Converter={StaticResource StatusToBrush}, ConverterParameter=Bg}"
+                            BorderThickness="1"
+                            BorderBrush="{Binding SelectedStatus, Converter={StaticResource StatusToBrush}}">
+                        <TextBlock FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{Binding SelectedStatus, Converter={StaticResource StatusToBrush}}"
+                                   Text="{Binding SelectedStatus, Converter={StaticResource StatusToLabel}}" />
+                    </Border>
+                </StackPanel>
+
+                <Border Height="1" Background="{StaticResource BrushLine1}" />
+
+                <!-- Program progress -->
+                <StackPanel Margin="14">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="程序进度" Margin="0,0,0,8" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="13" Text="{Binding SegmentDisplay}" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="13" Margin="0,4,0,0" Text="{Binding CycleDisplay}" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="13" Margin="0,4,0,0" Text="{Binding RemainDisplay}" />
+                </StackPanel>
+
+                <Border Height="1" Background="{StaticResource BrushLine1}" />
+
+                <!-- Ops -->
+                <StackPanel Margin="14">
+                    <TextBlock Style="{StaticResource CardLabel}" Text="主操作" Margin="0,0,0,10" />
+                    <Button Content="暂停试验" Style="{StaticResource PrimaryFlatButton}" Height="48"
+                            Command="{Binding PauseCommand}" Margin="0,0,0,8" />
+                    <UniformGrid Columns="2" >
+                        <Button Content="下一段" Style="{StaticResource GhostFlatButton}" Margin="0,0,4,0" IsEnabled="False" />
+                        <Button Content="报警复位" Style="{StaticResource GhostFlatButton}" Margin="4,0,0,0"
+                                Command="{Binding ResetCommand}" />
+                    </UniformGrid>
+                    <Border Height="1" Background="{StaticResource BrushLine1}" Margin="0,14" />
+                    <Button Content="停止试验" Style="{StaticResource DangerFlatButton}" Height="48"
+                            Command="{Binding StopCommand}" />
+                    <TextBlock Foreground="{StaticResource BrushTxt3}" FontSize="11" Margin="0,8,0,0"
+                               TextWrapping="Wrap" Text="停止为高风险操作 · 二次确认与试验记录在 Pkg 3/4 接入" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
