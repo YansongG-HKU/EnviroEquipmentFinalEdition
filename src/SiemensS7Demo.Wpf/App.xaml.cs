@@ -9,6 +9,7 @@ using Serilog;
 using SiemensS7Demo.App;
 using SiemensS7Demo.App.Auth;
 using SiemensS7Demo.Wpf.Smoke;
+using SiemensS7Demo.Wpf.Startup;
 using SiemensS7Demo.Wpf.Views;
 using SiemensS7Demo.Wpf.ViewModels;
 
@@ -41,6 +42,8 @@ public partial class App : Application
                 services.AddSingleton<OverviewViewModel>();
                 services.AddTransient<SingleDeviceViewModel>();
                 services.AddSingleton<Shell>();
+                services.AddSingleton<LoginViewModel>();
+                services.AddSingleton<LoginWindow>();
                 services.AddTransient<HeadlessSmokeRunner>();
             })
             .Build();
@@ -58,10 +61,11 @@ public partial class App : Application
             return;
         }
 
-        // Normal launch: wire the live device stream into the screens, show the shell, then start
-        // polling. Subscribe BEFORE ConnectAllAsync so the first snapshots are not missed (the
-        // stream is a BehaviorSubject, but subscribing first guarantees every device's first poll
-        // lands on the UI thread captured here).
+        // Normal launch. Wire the shell up-front (data context + RBAC + observable subscriptions)
+        // so the moment the StartupOrchestrator decides to Show() it, every binding is live. The
+        // shell window itself is NOT shown here — the orchestrator displays LoginView first and
+        // only swaps in the shell after a successful sign-in. Before this gate landed, the shell
+        // popped immediately and the 3-step login flow was unreachable.
         var overview = _host.Services.GetRequiredService<OverviewViewModel>();
         var single = _host.Services.GetRequiredService<SingleDeviceViewModel>();
         var shellVm = _host.Services.GetRequiredService<ShellViewModel>();
@@ -69,10 +73,6 @@ public partial class App : Application
         single.Subscribe();
         shellVm.BindOverview(overview);
         shellVm.StartClock();
-        // Bind RBAC: subscribes ShellViewModel to IAuthService.CurrentChanged so nav-rail
-        // visibility + role-gated command CanExecute state track the signed-in user. Without
-        // this, every signed-in session sees Admin power because IRbacContext otherwise has no
-        // way to learn that the active sign-in changed.
         var auth = _host.Services.GetRequiredService<IAuthService>();
         var rbac = _host.Services.GetRequiredService<IRbacContext>();
         shellVm.WireRbac(auth, rbac);
@@ -80,11 +80,54 @@ public partial class App : Application
 
         var shell = _host.Services.GetRequiredService<Shell>();
         shell.DataContext = shellVm;
-        shell.Show();
-        MainWindow = shell;
+        var loginWindow = _host.Services.GetRequiredService<LoginWindow>();
+        loginWindow.DataContext = _host.Services.GetRequiredService<LoginViewModel>();
+
+        // ShutdownMode is left at OnLastWindowClose by default; we set MainWindow explicitly so
+        // closing either surface during the sign-in/sign-out swap doesn't terminate the app.
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+        var host = new WindowShellHost(this, loginWindow, shell);
+        var orchestrator = new StartupOrchestrator(auth, host);
+        orchestrator.Begin();
 
         var sessionManager = _host.Services.GetRequiredService<IDeviceSessionManager>();
         await sessionManager.ConnectAllAsync(CancellationToken.None);
+    }
+
+    /// <summary>
+    /// WPF-bound implementation of <see cref="IShellHost"/>. Lives in this file because it
+    /// directly drives <see cref="Window.Show"/>/<see cref="Window.Close"/> on the two pre-built
+    /// window instances. Tests target the orchestrator with a fake host.
+    /// </summary>
+    private sealed class WindowShellHost : IShellHost
+    {
+        private readonly App _app;
+        private readonly LoginWindow _login;
+        private readonly Shell _shell;
+
+        public WindowShellHost(App app, LoginWindow login, Shell shell)
+        {
+            _app = app;
+            _login = login;
+            _shell = shell;
+        }
+
+        public void ShowLogin()
+        {
+            _app.MainWindow = _login;
+            _login.Show();
+        }
+
+        public void CloseLogin() => _login.Hide();
+
+        public void ShowShell()
+        {
+            _app.MainWindow = _shell;
+            _shell.Show();
+        }
+
+        public void CloseShell() => _shell.Hide();
     }
 
     protected override async void OnExit(ExitEventArgs e)
