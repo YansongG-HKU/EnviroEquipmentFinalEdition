@@ -5,6 +5,7 @@
         xmlns:vmalarms="clr-namespace:SiemensS7Demo.Wpf.ViewModels.Alarms"
         xmlns:views="clr-namespace:SiemensS7Demo.Wpf.Views"
         xmlns:valarms="clr-namespace:SiemensS7Demo.Wpf.Views.Alarms"
+        xmlns:alarms="clr-namespace:SiemensS7Demo.Wpf.Alarms"
         Title="温箱控制系统"
         Width="1600" Height="920"
         MinWidth="1280" MinHeight="800"
@@ -207,5 +208,11 @@
                            Foreground="{StaticResource BrushTxt3}" FontSize="11" Text="温箱 v4.2.1 · build 20260418" />
             </DockPanel>
         </Border>
+
+        <!-- ───────── M2.5: non-blocking toast overlay (bottom-right) ───────── -->
+        <alarms:AlarmToastHost x:Name="ToastHost"
+                               Grid.Row="0" Grid.RowSpan="3"
+                               Panel.ZIndex="1000"
+                               IsHitTestVisible="False" />
     </Grid>
 </Window>

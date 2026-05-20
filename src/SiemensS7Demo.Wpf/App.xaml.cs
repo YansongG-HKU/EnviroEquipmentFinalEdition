@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using SiemensS7Demo.App;
+using SiemensS7Demo.Wpf.Alarms;
 using SiemensS7Demo.Wpf.Smoke;
 using SiemensS7Demo.Wpf.Views;
 using SiemensS7Demo.Wpf.ViewModels;
@@ -43,6 +44,10 @@ public partial class App : Application
                 services.AddSingleton<ShellViewModel>();
                 services.AddSingleton<Shell>();
                 services.AddTransient<HeadlessSmokeRunner>();
+                // M2.5: critical-alarm popup pipeline + Warn/Info toast surface.
+                services.AddSingleton<IAlarmPopupGate, WindowAlarmPopupGate>();
+                services.AddSingleton<AlarmPopupCoordinator>();
+                services.AddSingleton<AlarmToastNotifier>();
             })
             .Build();
 
@@ -71,6 +76,10 @@ public partial class App : Application
         _ = _host.Services.GetRequiredService<SiemensS7Demo.App.Alarms.IAlarmService>();
         _ = _host.Services.GetRequiredService<CurrentAlarmsViewModel>();
         _ = _host.Services.GetRequiredService<HistoryAlarmsViewModel>();
+        // M2.5: eagerly resolve the popup coordinator + toast notifier so their subscriptions to
+        // IAlarmService.Stream are live before the first device snapshot lands.
+        _ = _host.Services.GetRequiredService<AlarmPopupCoordinator>();
+        _ = _host.Services.GetRequiredService<AlarmToastNotifier>();
         var shellVm = _host.Services.GetRequiredService<ShellViewModel>();
         overview.Subscribe();
         single.Subscribe();
