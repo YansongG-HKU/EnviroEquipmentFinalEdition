@@ -13,7 +13,7 @@ namespace SiemensS7Demo.App.Mqtt;
 /// exponential-backoff retry on initial connect. Credentials live in
 /// <see cref="MqttPublisherOptions"/> and are never logged.
 /// </summary>
-public sealed class MqttPublisher : IMqttPublisher
+public sealed class MqttPublisher : IMqttPublisher, IDisposable
 {
     private readonly MqttPublisherOptions _opts;
     private readonly IMqttClient _client;
@@ -149,6 +149,20 @@ public sealed class MqttPublisher : IMqttPublisher
             // best-effort disconnect during shutdown.
         }
         _client.Dispose();
+    }
+
+    /// <summary>
+    /// Synchronous dispose for the DI container, which only knows how to call
+    /// <see cref="IDisposable.Dispose"/> when resolving singletons via the
+    /// non-async <c>ServiceProvider.Dispose</c> path. Best-effort: skips the
+    /// graceful broker disconnect (the OS will tear down the TCP socket on
+    /// process exit).
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        try { _client.Dispose(); } catch { /* shutdown best-effort */ }
     }
 
     private void ThrowIfDisposed()
