@@ -73,8 +73,10 @@ public class ProtectedStoreTests
         bytes[bytes.Length / 2] ^= 0xFF;
         var corrupted = Convert.ToBase64String(bytes);
 
+#pragma warning disable CA1416 // Runtime guard above; analyzer can't see across the early return into the lambda.
         var act = () => s.Unprotect(corrupted);
         var ex = act.Should().Throw<CryptographicException>().Which;
+#pragma warning restore CA1416
         ex.Message.Should().NotContain(Secret);
         ex.Message.Should().NotContain(corrupted);
     }
