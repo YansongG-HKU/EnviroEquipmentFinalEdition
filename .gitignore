@@ -7,6 +7,9 @@ TestResults/
 *.trx
 *.coverage
 
+# Runtime logs (Serilog file sink)
+logs/
+
 # IDE
 .vs/
 .vscode/
