@@ -35,6 +35,7 @@ public partial class App : Application
             .ConfigureServices((ctx, services) =>
             {
                 services.AddSiemensS7DemoApp();
+                services.AddPkg4Auth(ctx.Configuration);
                 services.AddSingleton<ShellViewModel>();
                 services.AddSingleton<OverviewViewModel>();
                 services.AddTransient<SingleDeviceViewModel>();

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using SiemensS7Demo.App;
 using SiemensS7Demo.Domain;
+using SiemensS7Demo.Domain.Users;
 using SiemensS7Demo.Wpf.ViewModels;
 using Xunit;
 
