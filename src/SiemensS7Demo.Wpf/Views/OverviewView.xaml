@@ -1,8 +1,99 @@
 <UserControl x:Class="SiemensS7Demo.Wpf.Views.OverviewView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:SiemensS7Demo.Wpf.Converters"
              Background="{StaticResource BrushBg1}">
-    <!-- 9-card grid lands in Task 4 (M1.4). Placeholder so Shell DataTemplate resolves. -->
-    <TextBlock Text="总览" Foreground="{StaticResource BrushTxt2}"
-               HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" />
+    <UserControl.Resources>
+        <conv:StatusToBrushConverter x:Key="StatusToBrush" />
+        <conv:StatusToLabelConverter x:Key="StatusToLabel" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Summary strip -->
+        <Border Grid.Row="0" Background="{StaticResource BrushBg2}"
+                BorderBrush="{StaticResource BrushLine1}" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Margin="16,12">
+                <StackPanel Margin="0,0,28,0">
+                    <TextBlock Style="{StaticResource LabelText}" Text="在线" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="28"
+                               Foreground="{StaticResource BrushOk}"
+                               Text="{Binding OnlineCount, StringFormat={}{0:D2}}" />
+                </StackPanel>
+                <StackPanel Margin="0,0,28,0">
+                    <TextBlock Style="{StaticResource LabelText}" Text="报警" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="28"
+                               Foreground="{StaticResource BrushAlarm}"
+                               Text="{Binding AlarmCount, StringFormat={}{0:D2}}" />
+                </StackPanel>
+                <StackPanel Margin="0,0,28,0">
+                    <TextBlock Style="{StaticResource LabelText}" Text="离线" />
+                    <TextBlock Style="{StaticResource MonoText}" FontSize="28"
+                               Foreground="{StaticResource BrushOffline}"
+                               Text="{Binding OfflineCount, StringFormat={}{0:D2}}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 3x3 grid -->
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Cards}" Margin="14">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" Rows="3" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource DeviceCardSurface}" Margin="5">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Left accent bar -->
+                            <Border Width="4" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                                    Grid.Row="0" Grid.RowSpan="3"
+                                    Background="{Binding Status, Converter={StaticResource StatusToBrush}}" />
+
+                            <!-- Header -->
+                            <DockPanel Grid.Row="0" LastChildFill="False" Margin="14,2,2,8">
+                                <TextBlock DockPanel.Dock="Left" Style="{StaticResource MonoText}"
+                                           FontSize="15" Text="{Binding Id}" />
+                                <Border DockPanel.Dock="Right"
+                                        Background="{Binding Status, Converter={StaticResource StatusToBrush}}"
+                                        CornerRadius="9" Padding="8,2">
+                                    <TextBlock Foreground="White" FontSize="11"
+                                               Text="{Binding Status, Converter={StaticResource StatusToLabel}}" />
+                                </Border>
+                            </DockPanel>
+
+                            <!-- Bay -->
+                            <TextBlock Grid.Row="1" Margin="14,0" Style="{StaticResource LabelText}"
+                                       Text="{Binding Bay}" />
+
+                            <!-- PV / SV row -->
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,8,0,4">
+                                <StackPanel Margin="0,0,24,0">
+                                    <TextBlock Style="{StaticResource LabelText}" Text="温度 PV" />
+                                    <TextBlock Style="{StaticResource MonoText}" FontSize="22"
+                                               Text="{Binding Pv, StringFormat={}{0:F2}}" />
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource LabelText}" Text="温度 SV" />
+                                    <TextBlock Style="{StaticResource MonoText}" FontSize="22"
+                                               Foreground="{StaticResource BrushTxt2}"
+                                               Text="{Binding Sv, StringFormat={}{0:F2}}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
 </UserControl>
