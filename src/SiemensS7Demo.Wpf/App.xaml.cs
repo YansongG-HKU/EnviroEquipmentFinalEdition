@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,10 +56,26 @@ public partial class App : Application
             return;
         }
 
+        // Normal launch: wire the live device stream into the screens, show the shell, then start
+        // polling. Subscribe BEFORE ConnectAllAsync so the first snapshots are not missed (the
+        // stream is a BehaviorSubject, but subscribing first guarantees every device's first poll
+        // lands on the UI thread captured here).
+        var overview = _host.Services.GetRequiredService<OverviewViewModel>();
+        var single = _host.Services.GetRequiredService<SingleDeviceViewModel>();
+        var shellVm = _host.Services.GetRequiredService<ShellViewModel>();
+        overview.Subscribe();
+        single.Subscribe();
+        shellVm.BindOverview(overview);
+        shellVm.StartClock();
+        overview.CardActivated += id => shellVm.OpenDevice(id);
+
         var shell = _host.Services.GetRequiredService<Shell>();
-        shell.DataContext = _host.Services.GetRequiredService<ShellViewModel>();
+        shell.DataContext = shellVm;
         shell.Show();
         MainWindow = shell;
+
+        var sessionManager = _host.Services.GetRequiredService<IDeviceSessionManager>();
+        await sessionManager.ConnectAllAsync(CancellationToken.None);
     }
 
     protected override async void OnExit(ExitEventArgs e)

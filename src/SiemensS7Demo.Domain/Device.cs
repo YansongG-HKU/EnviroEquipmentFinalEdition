@@ -8,4 +8,7 @@ public sealed class Device
     public DeviceStatus Status { get; set; } = DeviceStatus.Offline;
     public Setpoints Setpoints { get; set; } = new(null, null, null);
     public ReadingSnapshot? LastReading { get; set; }
+
+    /// <summary>Runtime program / progress metadata (segment, cycle, remaining, alarm). Never null.</summary>
+    public DeviceProgram Program { get; set; } = DeviceProgram.Empty;
 }

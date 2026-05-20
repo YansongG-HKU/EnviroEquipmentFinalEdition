@@ -104,12 +104,23 @@ public sealed class DeviceSessionManager : IDeviceSessionManager, IAsyncDisposab
         private readonly Device _state;
         private readonly TagDefinition _pvTag;
         private readonly TagDefinition _svTag;
+        private readonly DeviceSeed? _seed;
+        private readonly int _phase;
         private bool _connected;
+        private int _tick;
+        // Once the operator writes a setpoint, the seed's TempSet no longer drives the SV — the
+        // live readback does. Keeps the headless smoke (write 77.5 -> read 77.5) honest.
+        private volatile bool _svOverridden;
 
         public DeviceSession(DeviceProvisioning prov, ILogger logger)
         {
             _prov = prov;
             _logger = logger;
+            _seed = prov.Seed;
+            // Deterministic per-device phase so each card's simulated wave is offset (mirrors the
+            // seeded sparklines in components-core.jsx genSeries()).
+            _phase = 0;
+            foreach (var ch in prov.Id) _phase += ch;
             var opts = new PlcConnectionOptions
             {
                 Name = prov.Id,
@@ -143,15 +154,48 @@ public sealed class DeviceSessionManager : IDeviceSessionManager, IAsyncDisposab
                 Type = prov.Type,
                 Status = DeviceStatus.Idle,
             };
+
+            // Seed the InMemory backing store so the very first read returns realistic values
+            // instead of 0.0. The simulated wobble is applied per-poll on top of the SV.
+            if (_seed is not null)
+            {
+                if (_seed.TempSet is double ts)
+                {
+                    _ = _client.WriteTagAsync(_svTag, (float)ts, CancellationToken.None);
+                }
+                _state.Program = ToProgram(_seed);
+            }
         }
+
+        private static DeviceProgram ToProgram(DeviceSeed s) => new(
+            Name: s.ProgName,
+            Seg: s.Seg,
+            SegTotal: s.SegTotal,
+            Cycle: s.Cycle,
+            CycleTotal: s.CycleTotal,
+            RemainSec: s.RemainSec,
+            Progress: s.Progress,
+            AlarmCode: s.AlarmCode,
+            AlarmMessage: s.AlarmMessage,
+            Note: s.Note);
 
         public async Task RunAsync(TimeSpan interval, BehaviorSubject<Device> sink, CancellationToken ct)
         {
             try
             {
+                // A seeded offline device never connects — it reports Offline forever (mirrors the
+                // 离线 card in the design, which shows no live readings).
+                if (_seed is { Status: DeviceStatus.Offline })
+                {
+                    _state.Status = DeviceStatus.Offline;
+                    _state.LastReading = null;
+                    sink.OnNext(_state);
+                    return;
+                }
+
                 await _client.ConnectAsync(ct);
                 _connected = true;
-                _state.Status = DeviceStatus.Idle;
+                _state.Status = _seed?.Status ?? DeviceStatus.Idle;
                 sink.OnNext(_state);
 
                 while (!ct.IsCancellationRequested)
@@ -159,17 +203,42 @@ public sealed class DeviceSessionManager : IDeviceSessionManager, IAsyncDisposab
                     try
                     {
                         var snap = await _client.ReadTagsAsync(new[] { _pvTag, _svTag }, ct);
-                        var pv = snap.TryGetValue(_pvTag.Name, out var pvV)
-                            ? Convert.ToDouble(pvV.Value, System.Globalization.CultureInfo.InvariantCulture)
-                            : (double?)null;
-                        var sv = snap.TryGetValue(_svTag.Name, out var svV)
+                        var svRaw = snap.TryGetValue(_svTag.Name, out var svV)
                             ? Convert.ToDouble(svV.Value, System.Globalization.CultureInfo.InvariantCulture)
                             : (double?)null;
+                        var pvRaw = snap.TryGetValue(_pvTag.Name, out var pvV)
+                            ? Convert.ToDouble(pvV.Value, System.Globalization.CultureInfo.InvariantCulture)
+                            : (double?)null;
+
+                        // Effective setpoint: the seeded SV until the operator writes one, then the
+                        // live readback wins. Unseeded devices always use the readback.
+                        var sv = (_seed?.TempSet is double seedSv && !_svOverridden) ? seedSv : svRaw;
+                        // Simulate a wavy PV around the setpoint for seeded devices so cards/sparklines
+                        // animate like the design. Unseeded devices keep raw readback behavior.
+                        double? pv;
+                        double? humid = null;
+                        if (_seed is not null)
+                        {
+                            _tick++;
+                            var wobble = Math.Sin((_tick + _phase) * 0.30) * 0.6 + Math.Sin((_tick + _phase) * 0.11) * 0.4;
+                            var basePv = _svOverridden ? (sv ?? 0) : (_seed.Temp ?? sv ?? 0);
+                            pv = Math.Round(basePv + wobble, 2);
+                            if (_seed.Humid is double h)
+                            {
+                                var hWobble = Math.Sin((_tick + _phase) * 0.27 + 1.0) * 0.5;
+                                humid = Math.Round(h + hWobble, 2);
+                            }
+                        }
+                        else
+                        {
+                            pv = pvRaw;
+                        }
 
                         _state.LastReading = new ReadingSnapshot(
-                            DateTimeOffset.UtcNow, pv, sv, null, null, null, null);
-                        _state.Setpoints = new Setpoints(sv, null, null);
-                        _state.Status = DeviceStatus.Run;
+                            DateTimeOffset.UtcNow, pv, sv, humid, _seed?.HumidSet, null, null);
+                        _state.Setpoints = new Setpoints(sv, _seed?.HumidSet, null);
+                        // Honor the seeded status; unseeded devices report Run while polling succeeds.
+                        _state.Status = _seed?.Status ?? DeviceStatus.Run;
                         sink.OnNext(_state);
                     }
                     catch (OperationCanceledException) { throw; }
@@ -204,6 +273,7 @@ public sealed class DeviceSessionManager : IDeviceSessionManager, IAsyncDisposab
                     _connected = true;
                 }
                 await _client.WriteTagAsync(_svTag, (float)t, ct);
+                _svOverridden = true;
             }
         }
 
