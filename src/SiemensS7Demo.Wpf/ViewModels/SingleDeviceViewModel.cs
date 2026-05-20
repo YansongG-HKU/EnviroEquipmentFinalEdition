@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SiemensS7Demo.App;
 using SiemensS7Demo.Domain;
+using SiemensS7Demo.Domain.Users;
 
 namespace SiemensS7Demo.Wpf.ViewModels;
 
